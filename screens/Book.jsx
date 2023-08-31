@@ -72,10 +72,7 @@ export default Book = ({ route, navigation }) => {
     bookName: styleSheet.bookName,
     author: styleSheet.author,
     date: styleSheet.date,
-    main: [
-      styleSheet.main,
-      { backgroundColor: colors.thirdBg, borderColor: colors.thirdBg },
-    ],
+    main: styleSheet.main,
     image: styleSheet.image,
     pageCount: [styleSheet.pageCount, { color: colors.second }],
     desc: styleSheet.desc,
@@ -151,7 +148,7 @@ export default Book = ({ route, navigation }) => {
 
 const styleSheet = StyleSheet.create({
   cont: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     flex: 1,
   },
   text: {
@@ -186,13 +183,12 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     marginVertical: 8,
     borderRadius: 48,
-    borderWidth: 4,
     overflow: "hidden",
   },
   image: {
     aspectRatio: 0.9,
     resizeMode: "cover",
-    borderRadius: 8,
+    borderRadius: 48,
   },
   pageCount: {
     fontFamily: "Raleway_300Light",

@@ -1,7 +1,16 @@
 import { useColorScheme } from "react-native";
 
 const Colors = {
-  light: {},
+  light: {
+    first: "#468189",
+    firstBg: "#46818933",
+    second: "#77aca2",
+    secondBg: "#77aca233",
+    third: "#9dbebb",
+    thirdBg: "#9dbebb33",
+    bg: "#eee",
+    text: "#031926",
+  },
   dark: {
     first: "#9dbebb",
     firstBg: "#9dbebb33",

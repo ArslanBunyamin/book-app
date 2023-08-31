@@ -18,7 +18,7 @@ const HomeBook = ({ book }) => {
         <View style={styles.imgCont}>
           <ScaledImg
             style={styles.img}
-            desiredWidth={windowWidth / 2 - 40}
+            desiredWidth={windowWidth / 2 - 30}
             uri={book.coverUrl}
           />
         </View>

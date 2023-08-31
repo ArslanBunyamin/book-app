@@ -47,9 +47,9 @@ const Favourites = ({ navigation }) => {
     text: [styleSheet.text, { color: colors.text }],
     topnav: styleSheet.topnav,
     icon: [styleSheet.icon, { color: colors.text }],
-    listCont: [styleSheet.listCont, { backgroundColor: colors.thirdBg }],
+    listCont: styleSheet.listCont,
     list: styleSheet.list,
-    hasNoFavCont: [styleSheet.hasNoFavCont, { backgroundColor: colors.bg }],
+    hasNoFavCont: [styleSheet.hasNoFavCont, { backgroundColor: colors.third }],
     heart: [styleSheet.heart, { color: colors.first }],
   };
 
@@ -88,10 +88,9 @@ export default Favourites;
 const styleSheet = StyleSheet.create({
   cont: {
     flex: 1,
-    paddingHorizontal: 12,
   },
   text: {
-    fontFamily: "Raleway_300Light",
+    fontFamily: "Raleway_400Regular",
     fontSize: 24,
   },
   topnav: {
@@ -99,14 +98,13 @@ const styleSheet = StyleSheet.create({
     height: 48,
     justifyContent: "space-between",
     alignItems: "flex-end",
-    paddingHorizontal: 8,
+    paddingHorizontal: 24,
   },
   icon: {
     fontSize: 28,
   },
   listCont: {
     flex: 1,
-    borderRadius: 32,
     marginTop: 24,
   },
   list: {
