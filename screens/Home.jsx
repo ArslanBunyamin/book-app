@@ -1,6 +1,6 @@
 import {
   ActivityIndicator,
-  BackHandler,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -15,6 +15,8 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
 import useThemeColors from "../data/colors";
+import { Image } from "react-native";
+import bookgif from "../assets/bookgif.gif";
 
 const Home = ({ route, navigation }) => {
   const colors = useThemeColors();
@@ -22,7 +24,6 @@ const Home = ({ route, navigation }) => {
   const [lastBook, setLastBook] = useState({});
   const [didMount, setdidMount] = useState(false);
   const [isLoadNext, setisLoadNext] = useState(false);
-
   const firstFetch = async () => {
     firestore()
       .collection("Books")
@@ -64,56 +65,75 @@ const Home = ({ route, navigation }) => {
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
     text: [styleSheet.text, { color: colors.text }],
-    topnav: styleSheet.topnav,
-    icon: [styleSheet.icon, { color: colors.text }],
+    topnav: [styleSheet.topnav, { backgroundColor: colors.bg }],
+    icon: [styleSheet.icon, { color: colors.first }],
     listCont: styleSheet.listCont,
     list: styleSheet.list,
     hasNoFavCont: [styleSheet.hasNoFavCont, { backgroundColor: colors.bg }],
     heart: [styleSheet.heart, { color: colors.first }],
     image: styleSheet.image,
-    loading: [styleSheet.loading, { backgroundColor: colors.bg }],
+    loading: [styleSheet.loading],
+  };
+
+  const isCloseToBottom = ({
+    layoutMeasurement,
+    contentOffset,
+    contentSize,
+  }) => {
+    const paddingToBottom = 20;
+    return (
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom
+    );
   };
 
   return (
     <SafeAreaView style={styles.cont}>
-      <View style={styles.topnav}>
-        <TouchableOpacity>
-          <FontAwesome name="bars" style={styles.icon} />
-        </TouchableOpacity>
-        <Text style={styles.text}>All Books</Text>
-        <TouchableOpacity>
-          <FontAwesome name="search" style={styles.icon} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.listCont}>
-        <MasonryList
-          data={books}
-          renderItem={({ item }) => <HomeBook book={item.data()} />}
-          keyExtractor={(item) => item.data().id}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <View style={styles.loading}>
-              <ActivityIndicator size="large" color={colors.first} />
-              <Text
-                style={[styles.text, { color: colors.first, marginLeft: 12 }]}
-              >
-                Loading...
-              </Text>
-            </View>
-          }
-          onEndReachedThreshold={0.1}
-          onEndReached={() => {
-            setLastBook(books[books.length - 1].data().id);
+      <ScrollView
+        onScroll={({ nativeEvent }) => {
+          if (isCloseToBottom(nativeEvent)) {
             if (didMount) setisLoadNext(true);
-          }}
-        />
-        {isLoadNext ? (
-          <ActivityIndicator size="large" color={colors.first} />
-        ) : (
-          ""
-        )}
-      </View>
+            setLastBook(books[books.length - 1].data().id);
+          }
+        }}
+        scrollEventThrottle={400}
+        stickyHeaderIndices={[0]}
+        stickyHeaderHiddenOnScroll={true}
+      >
+        <View key={0}>
+          <View style={styles.topnav}>
+            <TouchableOpacity>
+              <FontAwesome name="bars" style={styles.icon} />
+            </TouchableOpacity>
+            <Text style={[styles.text, { color: colors.first }]}>
+              All Books
+            </Text>
+            <TouchableOpacity>
+              <FontAwesome name="search" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.listCont}>
+          <MasonryList
+            data={books}
+            renderItem={({ item }) => <HomeBook book={item.data()} />}
+            keyExtractor={(item) => item.data().id}
+            numColumns={2}
+            contentContainerStyle={styles.list}
+            ListEmptyComponent={
+              <View style={styles.loading}>
+                <Image source={bookgif} />
+              </View>
+            }
+          />
+          {isLoadNext ? (
+            <ActivityIndicator size="large" color={colors.first} />
+          ) : (
+            ""
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -125,7 +145,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
   },
   text: {
-    fontFamily: "Raleway_400Regular",
+    fontFamily: "Raleway_500Medium",
     fontSize: 24,
   },
   image: {
@@ -134,9 +154,9 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    height: 48,
+    height: 56,
     justifyContent: "space-between",
-    alignItems: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 24,
   },
   icon: {
@@ -144,20 +164,14 @@ const styleSheet = StyleSheet.create({
   },
   listCont: {
     flex: 1,
-    marginTop: 24,
   },
   list: {
     paddingTop: 16,
     paddingLeft: 16,
   },
   loading: {
-    marginRight: 16,
-    alignSelf: "stretch",
-    height: "100%",
+    height: 700,
     justifyContent: "center",
-    borderRadius: 20,
-    alignItems: "center",
-    flexDirection: "row",
-    padding: 20,
+    alignSelf: "center",
   },
 });

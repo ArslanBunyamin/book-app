@@ -14,7 +14,7 @@ import "react-native-safe-area-context";
 import useThemeColors from "../data/colors";
 import { Dimensions } from "react-native";
 import { Image } from "react-native";
-import bookGif from "../assets/bookGif.gif";
+import bookGif from "../assets/logingif.gif";
 
 const Login = () => {
   const windowWidth = Dimensions.get("window").width;
@@ -50,7 +50,10 @@ const Login = () => {
       },
       { merge: true }
     );
-    navigation.navigate("tabGroup");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "tabGroup" }],
+    });
 
     return returnObject;
   }
@@ -60,12 +63,12 @@ const Login = () => {
     button: styleSheet.button,
     icon: styleSheet.icon,
     text: [styleSheet.text, { color: colors.text }],
-    image: styleSheet.image,
+    image: [styleSheet.image, { width: windowWidth - 40 }],
   };
   return (
     <SafeAreaView style={styles.cont}>
       <Image source={bookGif} style={styles.image} />
-      <Text style={[styles.text, { marginVertical: 32, fontSize: 48 }]}>
+      <Text style={[styles.text, { marginBottom: 32, fontSize: 48 }]}>
         -Boox-
       </Text>
 
@@ -110,5 +113,5 @@ const styleSheet = StyleSheet.create({
     fontSize: 20,
     textAlign: "center",
   },
-  image: {},
+  image: { resizeMode: "contain", height: 400 },
 });

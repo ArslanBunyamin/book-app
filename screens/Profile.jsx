@@ -30,14 +30,14 @@ const Profile = ({ navigation }) => {
 
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
-    profileCont: [styleSheet.profileCont, { backgroundColor: colors.second }],
+    profileCont: [styleSheet.profileCont, { backgroundColor: colors.fourth }],
     imgCont: styleSheet.imgCont,
     infoCont: styleSheet.infoCont,
     pp: styleSheet.pp,
     name: styleSheet.name,
     email: styleSheet.email,
     text: [styleSheet.text, { color: colors.text }],
-    button: [styleSheet.button, { backgroundColor: colors.third }],
+    button: [styleSheet.button, { backgroundColor: colors.fifth }],
   };
 
   return (

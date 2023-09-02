@@ -1,13 +1,14 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useEffect } from "react";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { setUser } from "../storee/userSlice";
 import { useDispatch } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
 import useThemeColors from "../data/colors";
-// import { StackActions, NavigationActions } from 'react-navigation';
+import bookgif from "../assets/bookgif.gif";
+import { Image } from "react-native";
 
 export default Loading = ({ navigation }) => {
   const colors = useThemeColors();
@@ -20,17 +21,20 @@ export default Loading = ({ navigation }) => {
   const isSignedIn = async () => {
     const isSignedIn = await GoogleSignin.isSignedIn();
     if (!isSignedIn) {
-      navigation.navigate("login");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "login" }],
+      });
     } else {
       const getUser = await GoogleSignin.getCurrentUser();
       const currentUser = getUser.user;
       dispatch(setUser(currentUser));
-      navigation.navigate("tabGroup");
-      // const resetAction = StackActions.reset({
-      //   index: 0,
-      //   actions: [NavigationActions.navigate({ routeName: "library" })],
-      // });
-      // this.props.navigation.dispatch(resetAction);
+      // navigation.navigate("tabGroup");
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "tabGroup" }],
+      });
     }
   };
   useEffect(() => {
@@ -39,11 +43,13 @@ export default Loading = ({ navigation }) => {
 
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
-    text: [styleSheet.text, { color: colors.text }],
+    image: styleSheet.image,
   };
   return (
     <SafeAreaView style={styles.cont}>
-      <Text style={styles.text}>Loading...</Text>
+      <View style={styles.loading}>
+        <Image source={bookgif} />
+      </View>
     </SafeAreaView>
   );
 };
@@ -54,8 +60,8 @@ const styleSheet = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  text: {
-    fontFamily: "Raleway_300Light",
-    fontSize: 32,
+  image: {
+    height: 600,
+    justifyContent: "center",
   },
 });

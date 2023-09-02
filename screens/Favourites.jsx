@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import "react-native-gesture-handler";
 import useThemeColors from "../data/colors";
+import { ScrollView } from "react-native";
 
 const Favourites = ({ navigation }) => {
   const colors = useThemeColors();
@@ -45,40 +46,52 @@ const Favourites = ({ navigation }) => {
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
     text: [styleSheet.text, { color: colors.text }],
-    topnav: styleSheet.topnav,
-    icon: [styleSheet.icon, { color: colors.text }],
+    topnav: [styleSheet.topnav, { backgroundColor: colors.bg }],
+    icon: [styleSheet.icon, { color: colors.first }],
     listCont: styleSheet.listCont,
     list: styleSheet.list,
     hasNoFavCont: [styleSheet.hasNoFavCont, { backgroundColor: colors.third }],
-    heart: [styleSheet.heart, { color: colors.first }],
+    heart: [styleSheet.heart, { color: colors.bg }],
   };
 
   return (
     <SafeAreaView style={styles.cont}>
-      <View style={styles.topnav}>
-        <TouchableOpacity>
-          <FontAwesome name="bars" style={styles.icon} />
-        </TouchableOpacity>
-        <Text style={styles.text}>Bookmarks</Text>
-        <TouchableOpacity>
-          <FontAwesome name="search" style={styles.icon} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.listCont}>
-        <MasonryList
-          data={favBooks}
-          renderItem={({ item }) => <HomeBook book={item.data()} />}
-          keyExtractor={(item) => item.data().id}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <View style={styles.hasNoFavCont}>
-              <AntDesign name="heart" style={styles.heart} />
-              <Text style={styles.text}>Try to add some bookmarks.</Text>
-            </View>
-          }
-        />
-      </View>
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+        stickyHeaderHiddenOnScroll={true}
+      >
+        <View key={0}>
+          <View style={styles.topnav}>
+            <TouchableOpacity>
+              <FontAwesome name="bars" style={styles.icon} />
+            </TouchableOpacity>
+            <Text style={[styles.text, { color: colors.first }]}>
+              Bookmarks
+            </Text>
+            <TouchableOpacity>
+              <FontAwesome name="search" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.listCont}>
+          <MasonryList
+            data={favBooks}
+            renderItem={({ item }) => <HomeBook book={item.data()} />}
+            keyExtractor={(item) => item.data().id}
+            numColumns={2}
+            contentContainerStyle={styles.list}
+            ListEmptyComponent={
+              <View style={styles.hasNoFavCont}>
+                <AntDesign name="heart" style={styles.heart} />
+                <Text style={[styles.text, { color: colors.bg }]}>
+                  Try to add some bookmarks.
+                </Text>
+              </View>
+            }
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -95,9 +108,9 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    height: 48,
+    height: 56,
     justifyContent: "space-between",
-    alignItems: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 24,
   },
   icon: {
@@ -105,7 +118,6 @@ const styleSheet = StyleSheet.create({
   },
   listCont: {
     flex: 1,
-    marginTop: 24,
   },
   list: {
     paddingTop: 16,

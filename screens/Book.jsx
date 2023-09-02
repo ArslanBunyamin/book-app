@@ -181,7 +181,7 @@ const styleSheet = StyleSheet.create({
   },
   main: {
     flex: 1,
-    marginVertical: 8,
+    marginTop: 8,
     borderRadius: 48,
     overflow: "hidden",
   },
