@@ -68,8 +68,17 @@ const Login = () => {
   return (
     <SafeAreaView style={styles.cont}>
       <Image source={bookGif} style={styles.image} />
-      <Text style={[styles.text, { marginBottom: 32, fontSize: 48 }]}>
-        -Boox-
+      <Text
+        style={[
+          styles.text,
+          {
+            marginBottom: 32,
+            fontSize: 44,
+            fontFamily: "Raleway_200ExtraLight",
+          },
+        ]}
+      >
+        Book Mook
       </Text>
 
       <TouchableOpacity

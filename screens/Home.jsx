@@ -15,10 +15,9 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
 import useThemeColors from "../data/colors";
-import { Image } from "react-native";
-import bookgif from "../assets/bookgif.gif";
+import Splash from "../components/Splash";
 
-const Home = ({ route, navigation }) => {
+const Home = () => {
   const colors = useThemeColors();
   const [books, setBooks] = useState([]);
   const [lastBook, setLastBook] = useState({});
@@ -47,7 +46,7 @@ const Home = ({ route, navigation }) => {
           setdidMount(false);
           return;
         }
-        setBooks((prev) => [...prev, ...books.docs]);
+        setBooks((prev) => prev.concat(books.docs));
       })
       .catch((error) => console.log(error));
     setisLoadNext(false);
@@ -117,15 +116,11 @@ const Home = ({ route, navigation }) => {
         <View style={styles.listCont}>
           <MasonryList
             data={books}
-            renderItem={({ item }) => <HomeBook book={item.data()} />}
-            keyExtractor={(item) => item.data().id}
+            renderItem={({ item }) => <HomeBook book={item} />}
+            keyExtractor={(item) => item.id}
             numColumns={2}
             contentContainerStyle={styles.list}
-            ListEmptyComponent={
-              <View style={styles.loading}>
-                <Image source={bookgif} />
-              </View>
-            }
+            ListEmptyComponent={<Splash />}
           />
           {isLoadNext ? (
             <ActivityIndicator size="large" color={colors.first} />

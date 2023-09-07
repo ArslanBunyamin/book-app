@@ -11,33 +11,42 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import "react-native-gesture-handler";
 import useThemeColors from "../data/colors";
 import { ScrollView } from "react-native";
+import Splash from "../components/Splash";
 
 const Favourites = ({ navigation }) => {
   const colors = useThemeColors();
-  const [favBooks, setFavBooks] = useState([]);
+  const [favBooks, setfavBooks] = useState([]);
+  const [loading, setloading] = useState(true);
   const userStore = useSelector((state) => state.user);
   const user = userStore.user;
 
   const getBooks = async () => {
-    setFavBooks([]);
+    setfavBooks([]);
     const userData = await firestore().collection("Users").doc(user.id).get();
     const fsArray =
       "bookmarks" in userData.data() ? userData.data().bookmarks : [];
 
     const booksCollection = firestore().collection("Books");
-    fsArray.forEach(async (id) => {
-      const item = await booksCollection
-        .orderBy("id")
-        .where("id", "==", id)
-        .get()
-        .catch((error) => console.log(error));
-      setFavBooks((favBooks) => [...favBooks, item.docs[0]]);
+
+    let waitUntilGet = new Promise((resolve, reject) => {
+      fsArray.forEach(async (id, index, array) => {
+        const item = await booksCollection
+          .orderBy("id")
+          .where("id", "==", id)
+          .get();
+        setfavBooks((favBooks) => [...favBooks, item.docs[0]]);
+        if (index == array.length - 1) resolve();
+      });
+    });
+    waitUntilGet.then(() => {
+      setloading(false);
     });
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", (e) => {
-      getBooks();
+    const unsubscribe = navigation.addListener("focus", async () => {
+      setloading(true);
+      await getBooks();
     });
 
     return unsubscribe;
@@ -56,42 +65,46 @@ const Favourites = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.cont}>
-      <ScrollView
-        showsHorizontalScrollIndicator={false}
-        stickyHeaderIndices={[0]}
-        stickyHeaderHiddenOnScroll={true}
-      >
-        <View key={0}>
-          <View style={styles.topnav}>
-            <TouchableOpacity>
-              <FontAwesome name="bars" style={styles.icon} />
-            </TouchableOpacity>
-            <Text style={[styles.text, { color: colors.first }]}>
-              Bookmarks
-            </Text>
-            <TouchableOpacity>
-              <FontAwesome name="search" style={styles.icon} />
-            </TouchableOpacity>
+      {loading ? (
+        <Splash />
+      ) : (
+        <ScrollView
+          showsHorizontalScrollIndicator={false}
+          stickyHeaderIndices={[0]}
+          stickyHeaderHiddenOnScroll={true}
+        >
+          <View key={0}>
+            <View style={styles.topnav}>
+              <TouchableOpacity>
+                <FontAwesome name="bars" style={styles.icon} />
+              </TouchableOpacity>
+              <Text style={[styles.text, { color: colors.first }]}>
+                Bookmarks
+              </Text>
+              <TouchableOpacity>
+                <FontAwesome name="search" style={styles.icon} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-        <View style={styles.listCont}>
-          <MasonryList
-            data={favBooks}
-            renderItem={({ item }) => <HomeBook book={item.data()} />}
-            keyExtractor={(item) => item.data().id}
-            numColumns={2}
-            contentContainerStyle={styles.list}
-            ListEmptyComponent={
-              <View style={styles.hasNoFavCont}>
-                <AntDesign name="heart" style={styles.heart} />
-                <Text style={[styles.text, { color: colors.bg }]}>
-                  Try to add some bookmarks.
-                </Text>
-              </View>
-            }
-          />
-        </View>
-      </ScrollView>
+          <View style={styles.listCont}>
+            <MasonryList
+              data={favBooks}
+              renderItem={({ item }) => <HomeBook book={item.data()} />}
+              keyExtractor={(item) => item.data().id}
+              numColumns={2}
+              contentContainerStyle={styles.list}
+              ListEmptyComponent={
+                <View style={styles.hasNoFavCont}>
+                  <AntDesign name="heart" style={styles.heart} />
+                  <Text style={[styles.text, { color: colors.bg }]}>
+                    Try to add some bookmarks.
+                  </Text>
+                </View>
+              }
+            />
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };

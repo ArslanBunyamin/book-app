@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import firestore from "@react-native-firebase/firestore";
 import ScaledImg from "./ScaledImg";
 
 const HomeBook = ({ book }) => {
@@ -11,7 +12,8 @@ const HomeBook = ({ book }) => {
       <TouchableOpacity
         onPress={() => {
           navigation.navigate("book", {
-            book: book,
+            book: book.data(),
+            bookId: book.id,
           });
         }}
       >
@@ -19,7 +21,7 @@ const HomeBook = ({ book }) => {
           <ScaledImg
             style={styles.img}
             desiredWidth={windowWidth / 2 - 30}
-            uri={book.coverUrl}
+            uri={book.data().coverUrl}
           />
         </View>
       </TouchableOpacity>

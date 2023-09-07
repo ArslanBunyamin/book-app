@@ -94,8 +94,7 @@ export default Profile;
 const styleSheet = StyleSheet.create({
   cont: {
     flex: 1,
-    paddingHorizontal: 12,
-    justifyContent: "center",
+    padding: 12,
   },
   profileCont: {
     width: "100%",

@@ -8,7 +8,6 @@ const Colors = {
     fourth: "#a51c30cc",
     fifth: "#c7333fcc",
     bg: "#eee",
-    transparentBg: "#eee8",
     text: "#031926",
   },
   dark: {
@@ -18,7 +17,6 @@ const Colors = {
     fourth: "#84121d",
     fifth: "#680c1f",
     bg: "#1d1d1d",
-    transparentBg: "#1d1d1d88",
     text: "#eee",
   },
 };
