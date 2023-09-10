@@ -14,15 +14,15 @@ const Comment = ({ item: comment, replyHandler }) => {
     comment: [styleSheet.comment, { borderColor: colors.placeholder }],
     pp: [styleSheet.pp, { borderColor: colors.third }],
   };
-  const [hasSubComments, sethasSubComments] = useState();
+  const [hasSubComments, sethasSubComments] = useState(false);
   const [subComments, setsubComments] = useState([]);
   const [repliesOpened, setrepliesOpened] = useState(false);
 
   useEffect(() => {
     if (comment.subComments != undefined) {
       setsubComments(comment.subComments);
-      sethasSubComments(true);
     }
+    if (subComments.length != 0) sethasSubComments(true);
   }, [subComments]);
 
   return (

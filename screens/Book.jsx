@@ -78,6 +78,8 @@ export default Book = ({ route, navigation }) => {
       setisReplying(true);
       setinputValue("@" + username + " ");
       setreplyId(id);
+    } else {
+      setinputValue("");
     }
   };
 
