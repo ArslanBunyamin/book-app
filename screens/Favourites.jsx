@@ -29,12 +29,13 @@ const Favourites = ({ navigation }) => {
     const booksCollection = firestore().collection("Books");
 
     let waitUntilGet = new Promise((resolve, reject) => {
+      if (fsArray.length == 0) resolve();
       fsArray.forEach(async (id, index, array) => {
         const item = await booksCollection
           .orderBy("id")
           .where("id", "==", id)
           .get();
-        setfavBooks((favBooks) => [...favBooks, item.docs[0]]);
+        setfavBooks((prev) => [...prev, item.docs[0]]);
         if (index == array.length - 1) resolve();
       });
     });
@@ -89,8 +90,8 @@ const Favourites = ({ navigation }) => {
           <View style={styles.listCont}>
             <MasonryList
               data={favBooks}
-              renderItem={({ item }) => <HomeBook book={item.data()} />}
-              keyExtractor={(item) => item.data().id}
+              renderItem={({ item }) => <HomeBook book={item} />}
+              keyExtractor={(item) => item.id}
               numColumns={2}
               contentContainerStyle={styles.list}
               ListEmptyComponent={
@@ -121,10 +122,11 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    height: 56,
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 24,
+    paddingVertical: 20,
+    elevation: 100,
   },
   icon: {
     fontSize: 28,

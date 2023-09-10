@@ -1,14 +1,14 @@
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import firestore from "@react-native-firebase/firestore";
 import ScaledImg from "./ScaledImg";
+import useThemeColors from "../data/colors";
 
 const HomeBook = ({ book }) => {
   const windowWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const colors = useThemeColors();
   return (
-    <View style={styles.cont}>
+    <View style={[styles.cont]}>
       <TouchableOpacity
         onPress={() => {
           navigation.navigate("book", {
@@ -20,7 +20,7 @@ const HomeBook = ({ book }) => {
         <View style={styles.imgCont}>
           <ScaledImg
             style={styles.img}
-            desiredWidth={windowWidth / 2 - 30}
+            desiredWidth={windowWidth / 2 - 26}
             uri={book.data().coverUrl}
           />
         </View>
@@ -32,11 +32,11 @@ const HomeBook = ({ book }) => {
 export default HomeBook;
 
 const styles = StyleSheet.create({
+  cont: {},
   imgCont: {
-    marginBottom: 16,
-    marginRight: 16,
-    borderRadius: 24,
     overflow: "hidden",
+    margin: 8,
+    borderRadius: 24,
   },
   img: {
     resizeMode: "contain",

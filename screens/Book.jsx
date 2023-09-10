@@ -1,17 +1,28 @@
-import { Image, StyleSheet, Text, View } from "react-native";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  useColorScheme,
+} from "react-native";
+import {
+  Ionicons,
+  Entypo,
+  MaterialCommunityIcons,
+  FontAwesome,
+} from "@expo/vector-icons";
+
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  TouchableOpacity,
-  FlatList,
-  ScrollView,
-} from "react-native-gesture-handler";
-import { useState, useEffect } from "react";
+import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
+import { useState, useEffect, useRef } from "react";
 import useThemeColors from "../data/colors";
 import Splash from "../components/Splash";
-import { Button } from "react-native";
+import MasonryList from "@react-native-seoul/masonry-list";
+import Comment from "../components/Comment";
 
 export default Book = ({ route, navigation }) => {
   const colors = useThemeColors();
@@ -19,41 +30,33 @@ export default Book = ({ route, navigation }) => {
   const bookId = route.params?.bookId;
   const bookObject = firestore().collection("Books").doc(bookId);
 
-  let date = new Date(book.date);
   const [descOpened, setdescOpened] = useState(false);
   const [loading, setloading] = useState(true);
   const [comments, setcomments] = useState([]);
-  const [commentsEmpty, setcommentsEmpty] = useState(false);
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  date =
-    date.getFullYear() + " " + months[date.getMonth()] + " " + date.getDate();
-
+  const [commentsEmpty, setcommentsEmpty] = useState(true);
+  const [isCommenting, setisCommenting] = useState(false);
+  const textInputRef = useRef(null);
+  const [inputValue, setinputValue] = useState("");
+  const [isReplying, setisReplying] = useState(false);
   const [bookmarked, setbookmarked] = useState(false);
+  const [replyId, setreplyId] = useState(null);
+
   const user = useSelector((state) => state.user).user; //redux
   const userDoc = firestore().collection("Users").doc(user.id); //firestore
 
   const fetchBookmarks = async () => {
     const userData = await userDoc.get();
-    const bookmarks = userData.data().bookmarks;
+    let bookmarks = userData.data().bookmarks;
+    if (bookmarks == undefined) bookmarks = [];
     setbookmarked(bookmarks.includes(book.id));
     setloading(false);
   };
+  const fetchComments = async () => {
+    const comments = await (await bookObject.get()).data().comments;
+    if (comments != undefined) setcomments(comments);
+  };
 
-  const buttonHandler = async () => {
+  const bookmarkButtonPressed = async () => {
     if (bookmarked) {
       await userDoc.update({
         bookmarks: firestore.FieldValue.arrayRemove(book.id),
@@ -66,35 +69,81 @@ export default Book = ({ route, navigation }) => {
       setbookmarked(true);
     }
   };
-  const checkIfCommentsExists = async () => {
-    if (book.comments == undefined) {
-      await bookObject.update({
-        comments: [],
-      });
-      setcommentsEmpty(true);
+
+  const commentButtonPressed = (
+    { username, id } = { username: "", id: "" }
+  ) => {
+    setisCommenting(true);
+    if (username != "") {
+      setisReplying(true);
+      setinputValue("@" + username + " ");
+      setreplyId(id);
     }
-    if (book.comments == []) setcommentsEmpty(true);
   };
-  const commentHandler = async () => {
-    await bookObject.update({
-      comments: ["apsdıfhğasoıdf"],
-    });
+
+  const sendComment = async () => {
+    if (inputValue != "") {
+      const randomId = firestore().collection("Books").doc().id;
+      if (isReplying) {
+        let tempComments = comments;
+        const theIndex = tempComments.findIndex(
+          (comment) => comment.id == replyId
+        );
+        tempComments[theIndex].subComments.push({
+          text: inputValue,
+          timestamp: new Date(),
+          user: user,
+          id: randomId,
+          isReply: true,
+          parentId: replyId,
+        });
+        await bookObject.update({
+          comments: tempComments,
+        });
+      } else {
+        await bookObject.update({
+          comments: firestore.FieldValue.arrayUnion({
+            text: inputValue,
+            timestamp: new Date(),
+            user: user,
+            id: randomId,
+            isReply: false,
+            subComments: [],
+          }),
+        });
+      }
+    }
+    fetchComments();
+    setinputValue("");
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      checkIfCommentsExists();
       fetchBookmarks();
+      fetchComments();
     });
     return unsubscribe;
   }, [navigation]);
+
+  useEffect(() => {
+    if (isCommenting) {
+      textInputRef.current.focus();
+    }
+  }, [isCommenting]);
+
+  useEffect(() => {
+    if (comments.length > 0) setcommentsEmpty(false);
+  }, [comments]);
 
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
     text: [styleSheet.text, { color: colors.text }],
     icon: [styleSheet.icon, { color: colors.text }],
-    topnav: styleSheet.topnav,
-    genre: [styleSheet.genre, { color: colors.fourth }],
+    topnav: [
+      styleSheet.topnav,
+      { backgroundColor: colors.bg, borderBottomColor: colors.placeholder },
+    ],
+    genre: [styleSheet.genre, { color: colors.first }],
     bookName: styleSheet.bookName,
     author: styleSheet.author,
     date: styleSheet.date,
@@ -102,6 +151,14 @@ export default Book = ({ route, navigation }) => {
     image: styleSheet.image,
     pageCount: [styleSheet.pageCount, { color: colors.second }],
     desc: styleSheet.desc,
+    commentCont: [
+      styleSheet.commentCont,
+      { borderTopColor: useColorScheme() == "dark" ? "#3d3d3d" : "#ccc" },
+    ],
+    noComments: [styleSheet.noComments, { color: colors.third }],
+    textInput: [styleSheet.textInput, { color: colors.bg }],
+    commentList: styleSheet.commentList,
+    comment: styleSheet.comment,
   };
 
   return (
@@ -119,41 +176,49 @@ export default Book = ({ route, navigation }) => {
               <Entypo name="chevron-left" style={styles.icon} />
             </TouchableOpacity>
             <View>
-              <Text style={[styles.text, styles.date]}>{date}</Text>
-            </View>
-          </View>
-          <View
-            style={{
-              padding: 16,
-            }}
-          >
-            <FlatList
-              data={book.categories}
-              renderItem={({ item }) => (
-                <Text style={[styles.text, styles.genre]}>{item}</Text>
-              )}
-              keyExtractor={(item) => book.categories.indexOf(item)}
-              contentContainerStyle={{
-                flexDirection: "row",
-              }}
-            />
-            <View style={{ paddingVertical: 4 }}>
-              <Text style={[styles.text, styles.bookName]}>{book.title}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.text}>From </Text>
-                <Text style={[styles.text, styles.author]}>{book.author}</Text>
-              </View>
+              <Text style={[styles.text, styles.date]}>{book.date}</Text>
             </View>
           </View>
           <View style={styles.main}>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              contentContainerStyle={styleSheet.bookScroller}
+              showsVerticalScrollIndicator={false}
+            >
+              <View
+                style={{
+                  paddingBottom: 16,
+                }}
+              >
+                <FlatList
+                  horizontal={true}
+                  data={book.categories}
+                  renderItem={({ item }) => {
+                    return (
+                      <Text style={[styles.text, styles.genre]}>{item}</Text>
+                    );
+                  }}
+                  keyExtractor={(item) => book.categories.indexOf(item)}
+                />
+
+                <View style={{ paddingVertical: 4 }}>
+                  <Text style={[styles.text, styles.bookName]}>
+                    {book.title}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View style={{ flexDirection: "row" }}>
+                    <Text style={styles.text}>From </Text>
+                    <Text style={[styles.text, styles.author]}>
+                      {book.author}
+                    </Text>
+                  </View>
+                </View>
+              </View>
               <Image style={styles.image} source={{ uri: book.coverUrl }} />
               <View
                 style={{
@@ -165,39 +230,115 @@ export default Book = ({ route, navigation }) => {
                 <Text style={[styles.text, styles.pageCount]}>
                   {book.pageCount} pages
                 </Text>
-                <TouchableOpacity onPress={buttonHandler}>
-                  <Ionicons
-                    name={bookmarked ? "bookmark" : "bookmark-outline"}
-                    style={[
-                      styles.icon,
-                      { paddingRight: 8, fontSize: 32, color: colors.third },
-                    ]}
-                  />
-                </TouchableOpacity>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <TouchableOpacity onPress={commentButtonPressed}>
+                    <MaterialCommunityIcons
+                      name="comment-text-multiple-outline"
+                      style={{
+                        fontSize: 28,
+                        color: colors.third,
+                        paddingRight: 8,
+                        flex: 1,
+                      }}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={bookmarkButtonPressed}>
+                    <Ionicons
+                      name={bookmarked ? "bookmark" : "bookmark-outline"}
+                      style={[
+                        styles.icon,
+                        { fontSize: 32, color: colors.third },
+                      ]}
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => {
-                  setdescOpened((prev) => !prev);
-                }}
-                style={{ paddingVertical: 16 }}
-              >
-                <Text style={[styles.text, styles.desc]}>
-                  {descOpened
-                    ? book.description
-                    : book.description.split(" ").slice(0, 24).join(" ")}
+              <Text style={[styles.text, styles.desc]}>
+                {descOpened
+                  ? book.description
+                  : book.description.split(" ").slice(0, 40).join(" ")}
+                <Text
+                  style={[
+                    styles.text,
+                    { color: colors.first, fontFamily: "Raleway_900Black" },
+                  ]}
+                >
                   <Text
+                    onPress={() => setdescOpened((prev) => !prev)}
                     style={[
                       styles.text,
-                      { color: colors.first, fontFamily: "Raleway_900Black" },
+                      {
+                        color: colors.first,
+                      },
                     ]}
                   >
-                    {descOpened ? "" : " . . ."}
+                    {descOpened ? "...read less" : " . . . read more"}
                   </Text>
                 </Text>
-              </TouchableOpacity>
-              <View style={styles.commentCont}></View>
-              <View style={{ height: 24 }} />
+              </Text>
+
+              <View style={styles.commentCont}>
+                {commentsEmpty ? (
+                  <Text style={styles.noComments}>
+                    There is no comment yet.
+                  </Text>
+                ) : (
+                  <MasonryList
+                    contentContainerStyle={styles.commentList}
+                    data={comments}
+                    renderItem={({ item }) => (
+                      <Comment
+                        replyHandler={commentButtonPressed}
+                        item={item}
+                      />
+                    )}
+                    keyExtractor={(item) => item.id}
+                    numColumns={1}
+                  />
+                )}
+                {isCommenting ? (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      backgroundColor: isCommenting ? colors.third : colors.bg,
+                      alignItems: "center",
+                      borderRadius: 50,
+                      paddingHorizontal: 8,
+                    }}
+                  >
+                    <TextInput
+                      ref={textInputRef}
+                      style={styles.textInput}
+                      placeholder="Write a Comment..."
+                      placeholderTextColor={colors.placeholder}
+                      cursorColor={colors.bg}
+                      multiline={true}
+                      selectionColor={colors.first}
+                      onEndEditing={() => {
+                        setisCommenting(false);
+                        setisReplying(false);
+                      }}
+                      onChangeText={(e) => setinputValue(e)}
+                      value={inputValue}
+                    />
+                    <TouchableOpacity onPress={sendComment}>
+                      <FontAwesome
+                        name="send"
+                        style={[
+                          styles.icon,
+                          {
+                            fontSize: 24,
+                            padding: 8,
+                            color: colors.bg,
+                          },
+                        ]}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  ""
+                )}
+              </View>
             </ScrollView>
           </View>
         </View>
@@ -219,14 +360,14 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    height: 48,
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    paddingHorizontal: 12,
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 20,
   },
   genre: {
     fontSize: 16,
-    marginRight: 16,
+    marginRight: 8,
   },
   bookName: {
     fontFamily: "Raleway_700Bold",
@@ -241,11 +382,9 @@ const styleSheet = StyleSheet.create({
   },
   main: {
     flex: 1,
-    marginTop: 8,
-    borderRadius: 48,
     overflow: "hidden",
-    paddingHorizontal: 12,
   },
+  bookScroller: { paddingHorizontal: 12 },
   image: {
     aspectRatio: 0.9,
     resizeMode: "cover",
@@ -261,6 +400,22 @@ const styleSheet = StyleSheet.create({
     fontFamily: "Raleway_700Bold",
     lineHeight: 24,
     paddingHorizontal: 12,
+    paddingBottom: 12,
   },
-  commentCont: {},
+  commentCont: {
+    borderTopWidth: 1,
+    flex: 1,
+  },
+  noComments: {
+    fontSize: 20,
+    fontFamily: "Raleway_300Light",
+    textAlign: "center",
+    paddingVertical: 12,
+  },
+  textInput: { padding: 8, flex: 1, fontSize: 16 },
+  commentList: {},
+  comment: { padding: 8, flexDirection: "row", alignItems: "center" },
+  pp: {
+    resizeMode: "contain",
+  },
 });

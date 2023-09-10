@@ -9,6 +9,7 @@ const Colors = {
     fifth: "#c7333fcc",
     bg: "#eee",
     text: "#031926",
+    placeholder: "#aaa",
   },
   dark: {
     first: "#c52233",
@@ -18,6 +19,7 @@ const Colors = {
     fifth: "#680c1f",
     bg: "#1d1d1d",
     text: "#eee",
+    placeholder: "#3d3d3d",
   },
 };
 

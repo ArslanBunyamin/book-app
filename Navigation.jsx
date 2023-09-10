@@ -2,7 +2,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./screens/Home";
-import { StatusBar } from "expo-status-bar";
 import Favourites from "./screens/Favourites";
 import Book from "./screens/Book";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,7 +10,6 @@ import Login from "./screens/Login";
 import Profile from "./screens/Profile";
 import Loading from "./screens/Loading";
 import useThemeColors from "./data/colors";
-import { useState } from "react";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -31,7 +29,7 @@ const TabGroup = () => {
           height: 52,
           borderColor: "transparent",
         },
-        tabBarIcon: ({ color, focused, size }) => {
+        tabBarIcon: ({ focused }) => {
           let routeName = route.name;
 
           if (routeName == "profile") {
@@ -99,7 +97,6 @@ const Navigation = () => {
           options={horizontalAnimation}
         />
       </Stack.Navigator>
-      <StatusBar />
     </NavigationContainer>
   );
 };

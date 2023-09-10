@@ -18,5 +18,6 @@ const styles = StyleSheet.create({
     height: 700,
     justifyContent: "center",
     alignSelf: "center",
+    elevation: 100,
   },
 });

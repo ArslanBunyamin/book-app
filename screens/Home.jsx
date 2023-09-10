@@ -44,6 +44,7 @@ const Home = () => {
       .then((books) => {
         if (books.empty) {
           setdidMount(false);
+          setisLoadNext(false);
           return;
         }
         setBooks((prev) => prev.concat(books.docs));
@@ -149,10 +150,11 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    height: 56,
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 24,
+    paddingVertical: 20,
+    elevation: 100,
   },
   icon: {
     fontSize: 28,
@@ -162,7 +164,7 @@ const styleSheet = StyleSheet.create({
   },
   list: {
     paddingTop: 16,
-    paddingLeft: 16,
+    paddingHorizontal: 8,
   },
   loading: {
     height: 700,

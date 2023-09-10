@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import store from "./storee/store";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import {
   useFonts,
   Raleway_100Thin,
@@ -36,6 +37,7 @@ export default function App() {
       <Provider store={store}>
         <Navigation />
       </Provider>
+      <StatusBar />
     </SafeAreaProvider>
   );
 }
