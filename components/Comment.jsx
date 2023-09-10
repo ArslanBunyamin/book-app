@@ -22,6 +22,8 @@ const Comment = ({ item: comment, replyHandler }) => {
     if (comment.subComments != undefined) {
       setsubComments(comment.subComments);
     }
+  }, [comment]);
+  useEffect(() => {
     if (subComments.length != 0) sethasSubComments(true);
   }, [subComments]);
 
