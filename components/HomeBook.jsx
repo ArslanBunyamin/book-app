@@ -16,6 +16,7 @@ const HomeBook = ({ book }) => {
             bookId: book.id,
           });
         }}
+        activeOpacity={0.7}
       >
         <View style={styles.imgCont}>
           <ScaledImg

@@ -29,7 +29,6 @@ export default Loading = ({ navigation }) => {
       const getUser = await GoogleSignin.getCurrentUser();
       const currentUser = getUser.user;
       dispatch(setUser(currentUser));
-      // navigation.navigate("tabGroup");
 
       navigation.reset({
         index: 0,

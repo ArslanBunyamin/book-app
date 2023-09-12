@@ -33,7 +33,6 @@ export default Book = ({ route, navigation }) => {
   const [descOpened, setdescOpened] = useState(false);
   const [loading, setloading] = useState(true);
   const [comments, setcomments] = useState([]);
-  const [commentsEmpty, setcommentsEmpty] = useState(true);
   const [isCommenting, setisCommenting] = useState(false);
   const textInputRef = useRef(null);
   const [inputValue, setinputValue] = useState("");
@@ -133,10 +132,6 @@ export default Book = ({ route, navigation }) => {
     }
   }, [isCommenting]);
 
-  useEffect(() => {
-    if (comments.length > 0) setcommentsEmpty(false);
-  }, [comments]);
-
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
     text: [styleSheet.text, { color: colors.text }],
@@ -153,10 +148,7 @@ export default Book = ({ route, navigation }) => {
     image: styleSheet.image,
     pageCount: [styleSheet.pageCount, { color: colors.second }],
     desc: styleSheet.desc,
-    commentCont: [
-      styleSheet.commentCont,
-      { borderTopColor: useColorScheme() == "dark" ? "#3d3d3d" : "#ccc" },
-    ],
+    commentCont: [styleSheet.commentCont, { borderTopColor: colors.bg3 }],
     noComments: [styleSheet.noComments, { color: colors.third }],
     textInput: [styleSheet.textInput, { color: colors.bg }],
     commentList: styleSheet.commentList,
@@ -174,6 +166,7 @@ export default Book = ({ route, navigation }) => {
               onPress={() => {
                 navigation.goBack();
               }}
+              activeOpacity={0.7}
             >
               <Entypo name="chevron-left" style={styles.icon} />
             </TouchableOpacity>
@@ -233,7 +226,10 @@ export default Book = ({ route, navigation }) => {
                   {book.pageCount} pages
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <TouchableOpacity onPress={commentButtonPressed}>
+                  <TouchableOpacity
+                    onPress={commentButtonPressed}
+                    activeOpacity={0.7}
+                  >
                     <MaterialCommunityIcons
                       name="comment-text-multiple-outline"
                       style={{
@@ -244,7 +240,10 @@ export default Book = ({ route, navigation }) => {
                       }}
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={bookmarkButtonPressed}>
+                  <TouchableOpacity
+                    onPress={bookmarkButtonPressed}
+                    activeOpacity={0.7}
+                  >
                     <Ionicons
                       name={bookmarked ? "bookmark" : "bookmark-outline"}
                       style={[
@@ -280,24 +279,37 @@ export default Book = ({ route, navigation }) => {
               </Text>
 
               <View style={styles.commentCont}>
-                {commentsEmpty ? (
-                  <Text style={styles.noComments}>
-                    There is no comment yet.
-                  </Text>
-                ) : (
-                  <MasonryList
-                    contentContainerStyle={styles.commentList}
-                    data={comments}
-                    renderItem={({ item }) => (
-                      <Comment
-                        replyHandler={commentButtonPressed}
-                        item={item}
-                      />
-                    )}
-                    keyExtractor={(item) => item.id}
-                    numColumns={1}
-                  />
-                )}
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      color: colors.fifth,
+                      fontSize: 20,
+                      textAlign: "center",
+                      paddingVertical: 8,
+                      borderBottomWidth: 1,
+                      borderColor: colors.bg3,
+                    },
+                  ]}
+                >
+                  Comments
+                </Text>
+
+                <MasonryList
+                  contentContainerStyle={styles.commentList}
+                  data={comments}
+                  renderItem={({ item }) => (
+                    <Comment replyHandler={commentButtonPressed} item={item} />
+                  )}
+                  keyExtractor={(item) => item.id}
+                  numColumns={1}
+                  ListEmptyComponent={
+                    <Text style={styles.noComments}>
+                      There is no comment yet.
+                    </Text>
+                  }
+                />
+
                 {isCommenting ? (
                   <View
                     style={{
@@ -323,7 +335,7 @@ export default Book = ({ route, navigation }) => {
                       onChangeText={(e) => setinputValue(e)}
                       value={inputValue}
                     />
-                    <TouchableOpacity onPress={sendComment}>
+                    <TouchableOpacity onPress={sendComment} activeOpacity={0.7}>
                       <FontAwesome
                         name="send"
                         style={[

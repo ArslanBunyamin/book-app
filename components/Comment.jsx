@@ -5,13 +5,15 @@ import CalcDate from "../hooks/CalcDate";
 import { useEffect, useState } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import MasonryList from "@react-native-seoul/masonry-list";
+import { useNavigation } from "@react-navigation/native";
 
 const Comment = ({ item: comment, replyHandler }) => {
+  const navigation = useNavigation();
   const colors = useThemeColors();
   styles = {
     text: [styleSheet.text, { color: colors.text }],
     icon: [styleSheet.icon, { color: colors.third }],
-    comment: [styleSheet.comment, { borderColor: colors.placeholder }],
+    comment: [styleSheet.comment, { borderColor: colors.bg3 }],
     pp: [styleSheet.pp, { borderColor: colors.third }],
   };
   const [hasSubComments, sethasSubComments] = useState(false);
@@ -30,30 +32,41 @@ const Comment = ({ item: comment, replyHandler }) => {
   return (
     <View style={styles.comment}>
       <View style={{ flexDirection: "row" }}>
-        <View
+        <TouchableOpacity
           style={{
             marginTop: 4,
             width: 44,
           }}
+          onPress={() => {
+            navigation.navigate("profile", { user: comment.user });
+          }}
+          activeOpacity={0.7}
         >
           <ScaledImg
             uri={comment.user.photo}
             style={styles.pp}
             desiredWidth={44}
           />
-        </View>
+        </TouchableOpacity>
         <View
           style={{
             flex: 1,
-            marginLeft: 4,
+            marginLeft: 8,
           }}
         >
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={[styles.text, { fontFamily: "Raleway_700Bold" }]}>
-              {comment.user.name}
-            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("profile", { user: comment.user });
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.text, { fontFamily: "Raleway_700Bold" }]}>
+                {comment.user.name}
+              </Text>
+            </TouchableOpacity>
             <Text
               style={[
                 styles.text,
@@ -73,6 +86,7 @@ const Comment = ({ item: comment, replyHandler }) => {
                 id: comment.isReply ? comment.parentId : comment.id,
               })
             }
+            activeOpacity={0.7}
           >
             <Text
               style={[
@@ -104,6 +118,7 @@ const Comment = ({ item: comment, replyHandler }) => {
             <TouchableOpacity
               style={{ flexDirection: "row", flex: 1, paddingVertical: 8 }}
               onPress={() => setrepliesOpened(false)}
+              activeOpacity={0.7}
             >
               <AntDesign
                 name="totop"
@@ -120,6 +135,7 @@ const Comment = ({ item: comment, replyHandler }) => {
             onPress={() => {
               setrepliesOpened(true);
             }}
+            activeOpacity={0.7}
           >
             <Feather name="corner-right-down" size={24} style={styles.icon} />
             <Text
@@ -163,6 +179,7 @@ const styleSheet = StyleSheet.create({
     fontSize: 20,
   },
   subCommentCont: {
-    paddingLeft: 48,
+    paddingLeft: 20,
+    paddingBottom: 8,
   },
 });

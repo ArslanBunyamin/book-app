@@ -7,9 +7,10 @@ import Book from "./screens/Book";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Login from "./screens/Login";
-import Profile from "./screens/Profile";
+import MyProfile from "./screens/MyProfile";
 import Loading from "./screens/Loading";
 import useThemeColors from "./data/colors";
+import Profile from "./screens/Profile";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -32,7 +33,7 @@ const TabGroup = () => {
         tabBarIcon: ({ focused }) => {
           let routeName = route.name;
 
-          if (routeName == "profile") {
+          if (routeName == "myProfile") {
             return (
               <FontAwesome5
                 name={focused ? "user-alt" : "user"}
@@ -53,7 +54,7 @@ const TabGroup = () => {
     >
       <Tab.Screen name="library" component={Home} />
       <Tab.Screen name="bookmark" component={Favourites} />
-      <Tab.Screen name="profile" component={Profile} />
+      <Tab.Screen name="myProfile" component={MyProfile} />
     </Tab.Navigator>
   );
 };
@@ -94,6 +95,11 @@ const Navigation = () => {
         <Stack.Screen
           name="book"
           component={Book}
+          options={horizontalAnimation}
+        />
+        <Stack.Screen
+          name="profile"
+          component={Profile}
           options={horizontalAnimation}
         />
       </Stack.Navigator>

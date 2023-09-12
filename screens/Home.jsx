@@ -102,13 +102,13 @@ const Home = () => {
       >
         <View key={0}>
           <View style={styles.topnav}>
-            <TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.7}>
               <FontAwesome name="bars" style={styles.icon} />
             </TouchableOpacity>
             <Text style={[styles.text, { color: colors.first }]}>
               All Books
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.7}>
               <FontAwesome name="search" style={styles.icon} />
             </TouchableOpacity>
           </View>

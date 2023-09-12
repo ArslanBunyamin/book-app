@@ -12,42 +12,40 @@ import "react-native-gesture-handler";
 import useThemeColors from "../data/colors";
 import { ScrollView } from "react-native";
 import Splash from "../components/Splash";
+import splitTen from "../hooks/splitTen";
 
 const Favourites = ({ navigation }) => {
   const colors = useThemeColors();
   const [favBooks, setfavBooks] = useState([]);
-  const [loading, setloading] = useState(true);
+  const [loading, setloading] = useState(false);
   const userStore = useSelector((state) => state.user);
   const user = userStore.user;
 
-  const getBooks = async () => {
+  const getBooks1 = async () => {
+    setloading(true);
     setfavBooks([]);
     const userData = await firestore().collection("Users").doc(user.id).get();
     const fsArray =
       "bookmarks" in userData.data() ? userData.data().bookmarks : [];
 
+    const splittedBookmarkArray = splitTen(fsArray);
     const booksCollection = firestore().collection("Books");
 
-    let waitUntilGet = new Promise((resolve, reject) => {
-      if (fsArray.length == 0) resolve();
-      fsArray.forEach(async (id, index, array) => {
-        const item = await booksCollection
-          .orderBy("id")
-          .where("id", "==", id)
-          .get();
-        setfavBooks((prev) => [...prev, item.docs[0]]);
+    let waitUntilFetch = new Promise((resolve, reject) => {
+      if (splittedBookmarkArray.length == 0) resolve();
+      splittedBookmarkArray.forEach(async (bookmarks, index, array) => {
+        const books = (await booksCollection.where("id", "in", bookmarks).get())
+          .docs;
+        setfavBooks((prev) => prev.concat(books));
         if (index == array.length - 1) resolve();
       });
     });
-    waitUntilGet.then(() => {
-      setloading(false);
-    });
+    waitUntilFetch.then(() => setloading(false));
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
-      setloading(true);
-      await getBooks();
+      await getBooks1();
     });
 
     return unsubscribe;
@@ -76,13 +74,13 @@ const Favourites = ({ navigation }) => {
         >
           <View key={0}>
             <View style={styles.topnav}>
-              <TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.7}>
                 <FontAwesome name="bars" style={styles.icon} />
               </TouchableOpacity>
               <Text style={[styles.text, { color: colors.first }]}>
                 Bookmarks
               </Text>
-              <TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.7}>
                 <FontAwesome name="search" style={styles.icon} />
               </TouchableOpacity>
             </View>
@@ -136,7 +134,7 @@ const styleSheet = StyleSheet.create({
   },
   list: {
     paddingTop: 16,
-    paddingLeft: 16,
+    paddingHorizontal: 8,
   },
   hasNoFavCont: {
     justifyContent: "center",
@@ -145,6 +143,7 @@ const styleSheet = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 40,
     marginBottom: 16,
+    width: "100%",
   },
   heart: {
     fontSize: 64,

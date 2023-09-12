@@ -42,11 +42,12 @@ const Login = () => {
     const currentUser = getUser.user;
     dispatch(setUser(currentUser));
 
-    firestore().collection("Users").doc(currentUser.id).set(
+    firestore().collection("Users").doc(currentUser.id).update(
       {
         name: currentUser.name,
         email: currentUser.email,
         photoUrl: currentUser.photo,
+        id: currentUser.id,
       },
       { merge: true }
     );
@@ -86,6 +87,7 @@ const Login = () => {
         onPress={() =>
           onGoogleButtonPress().catch((error) => console.log(error))
         }
+        activeOpacity={0.7}
       >
         <FontAwesome name="google" style={styles.icon} />
         <Text style={styles.text}>Sign-In</Text>
