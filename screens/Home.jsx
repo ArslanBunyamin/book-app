@@ -27,7 +27,7 @@ const Home = () => {
     firestore()
       .collection("Books")
       .orderBy("id")
-      .limit(30)
+      .limit(10)
       .get()
       .then((books) => {
         setBooks(books.docs);
@@ -39,7 +39,7 @@ const Home = () => {
       .collection("Books")
       .orderBy("id")
       .startAfter(lastBook)
-      .limit(30)
+      .limit(10)
       .get()
       .then((books) => {
         if (books.empty) {

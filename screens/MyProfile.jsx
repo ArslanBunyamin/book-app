@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import ScaledImg from "../components/ScaledImg";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
 import useThemeColors from "../data/colors";
@@ -69,12 +69,11 @@ const MyProfile = ({ navigation }) => {
         <View style={{ width: "48%" }}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => {
-              navigation.navigate("library");
-            }}
+            onPress={() => {}}
             activeOpacity={0.7}
           >
-            <Text style={styles.text}>Go Home</Text>
+            <Text style={styles.text}>Edit Profile </Text>
+            <FontAwesome5 name="user-edit" style={styles.text} />
           </TouchableOpacity>
         </View>
         <View style={{ width: "48%" }}>

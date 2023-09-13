@@ -3,6 +3,7 @@ import {
   Modal,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -134,41 +135,53 @@ const Profile = ({ route, navigation }) => {
     return (
       <View
         style={{
-          marginVertical: 4,
+          margin: 4,
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-around",
+          backgroundColor: colors.bg3,
+          borderRadius: 8,
+          padding: 4,
+          overflow: "hidden",
           flex: 1,
         }}
       >
-        <View style={[styles.imgCont, { width: 64 }]}>
-          <ScaledImg
-            style={[styles.pp, { borderRadius: 100 }]}
-            uri={item.data().photo}
-            desiredWidth={64}
-          />
-        </View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={[styles.imgCont, { width: 56 }]}>
+            <ScaledImg
+              style={[styles.pp, { borderRadius: 100 }]}
+              uri={item.data().photo}
+              desiredWidth={56}
+            />
+          </View>
 
-        <Text style={[styles.infoText, { fontSize: 20, marginHorizontal: 12 }]}>
-          {item.data().name}
-        </Text>
-        <TouchableOpacity
+          <Text
+            style={[styles.infoText, { fontSize: 16, marginHorizontal: 12 }]}
+          >
+            {item.data().name.length < 14
+              ? item.data().name
+              : item.data().name.split("").slice(0, 13).join("") + "..."}
+          </Text>
+        </View>
+        <TouchableHighlight
           onPress={() => {
             setModalVisible(false);
+            setmodalWhich("");
             navigation.push("profile", { user: item.data() });
           }}
-          activeOpacity={0.7}
+          underlayColor={colors.third}
           style={{
-            backgroundColor: colors.bg3,
+            backgroundColor: colors.bg2,
             padding: 12,
             borderRadius: 8,
             justifyContent: "center",
-            elevation: 5,
+            elevation: 2,
           }}
         >
-          <Text style={[styles.infoText, { color: colors.third }]}>
+          <Text style={[styles.infoText, { fontSize: 13, color: colors.text }]}>
             show profile
           </Text>
-        </TouchableOpacity>
+        </TouchableHighlight>
       </View>
     );
   };
@@ -177,12 +190,14 @@ const Profile = ({ route, navigation }) => {
     return (
       <TouchableOpacity
         onPress={() => {
+          setModalVisible(false);
           setmodalWhich("");
           navigation.push("book", {
             book: item.data(),
             bookId: item.id,
           });
         }}
+        activeOpacity={0.7}
         style={{
           margin: 4,
           flexDirection: "row",
@@ -190,6 +205,9 @@ const Profile = ({ route, navigation }) => {
           backgroundColor: colors.bg3,
           borderRadius: 8,
           padding: 4,
+          overflow: "hidden",
+          flex: 1,
+          elevation: 4,
         }}
       >
         <View style={[styles.imgCont, { width: 64, borderRadius: 8 }]}>
@@ -200,8 +218,22 @@ const Profile = ({ route, navigation }) => {
           />
         </View>
 
-        <View style={{ height: "100%", paddingHorizontal: 8 }}>
-          <Text style={[styles.infoText, { fontSize: 20 }]}>
+        <View
+          style={{
+            height: "100%",
+            flex: 1,
+            paddingHorizontal: 8,
+          }}
+        >
+          <Text
+            style={[
+              styles.infoText,
+              {
+                fontSize: 20,
+                flexWrap: "wrap",
+              },
+            ]}
+          >
             {item.data().title}
           </Text>
           <Text style={[styles.infoText, { opacity: 0.7 }]}>
@@ -216,6 +248,9 @@ const Profile = ({ route, navigation }) => {
     if (modalWhich == "followers" || modalWhich == "follows")
       openModal(user.friends[modalWhich], modalWhich);
     else if (modalWhich == "bookmarks") openModal(user.bookmarks, "bookmarks");
+    else {
+      setModalVisible(false);
+    }
   }, [modalWhich]);
 
   return (
@@ -229,8 +264,8 @@ const Profile = ({ route, navigation }) => {
             transparent={true}
             visible={modalVisible}
             onRequestClose={() => {
+              setModalVisible(false);
               setmodalWhich("");
-              setModalVisible((prev) => !prev);
             }}
           >
             <View
@@ -241,18 +276,54 @@ const Profile = ({ route, navigation }) => {
               }}
             >
               <View style={styles.modalCont}>
-                <FlatList
-                  data={modalData}
-                  renderItem={({ item }) => {
-                    return modalWhich == "bookmarks" ? (
-                      <BookmarksModal item={item} />
-                    ) : (
-                      <FriendsModal item={item} />
-                    );
+                <View style={{ flex: 1, width: 360 }}>
+                  <FlatList
+                    data={modalData}
+                    renderItem={({ item }) => {
+                      return modalWhich == "bookmarks" ? (
+                        <BookmarksModal item={item} />
+                      ) : modalWhich == "follows" ||
+                        modalWhich == "followers" ? (
+                        <FriendsModal item={item} />
+                      ) : (
+                        ""
+                      );
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item) => item.id}
+                    numColumns={1}
+                  />
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: "100%",
+                    justifyContent: "center",
+                    position: "absolute",
+                    bottom: 20,
                   }}
-                  keyExtractor={(item) => item.id}
-                  numColumns={1}
-                />
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      setModalVisible(false);
+                      setmodalWhich("");
+                    }}
+                    activeOpacity={0.7}
+                    style={{
+                      backgroundColor: colors.bg3,
+                      paddingVertical: 8,
+                      paddingHorizontal: 20,
+                      elevation: 5,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: colors.bg,
+                    }}
+                  >
+                    <Text style={[styles.infoText, { color: colors.first }]}>
+                      close
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </Modal>
@@ -325,41 +396,43 @@ const Profile = ({ route, navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <View style={{ width: "48%" }}>
-              <TouchableOpacity
-                style={[styles.button, { alignItems: "center" }]}
-                onPress={() => {}}
-                activeOpacity={0.7}
-              >
-                <FontAwesome
-                  name="envelope-o"
-                  style={[styles.text, { color: colors.third }]}
-                />
-                <Text style={[styles.text, { color: colors.third }]}>
-                  {" "}
-                  Message
-                </Text>
-              </TouchableOpacity>
+          {me.email == user.email ? null : (
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <View style={{ width: "48.5%" }}>
+                <TouchableOpacity
+                  style={[styles.button, { alignItems: "center" }]}
+                  onPress={() => {}}
+                  activeOpacity={0.7}
+                >
+                  <FontAwesome
+                    name="envelope-o"
+                    style={[styles.text, { color: colors.third }]}
+                  />
+                  <Text style={[styles.text, { color: colors.third }]}>
+                    {" "}
+                    Message
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ width: "48.5%" }}>
+                <TouchableOpacity
+                  style={[styles.button, { alignItems: "center" }]}
+                  onPress={addFriend}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons
+                    name={following ? "person-remove" : "person-add-alt"}
+                    style={[styles.text, { fontSize: 32, color: colors.third }]}
+                  />
+                  <Text style={[styles.text, { color: colors.third }]}>
+                    {following ? " unfollow" : " Follow"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={{ width: "48%" }}>
-              <TouchableOpacity
-                style={[styles.button, { alignItems: "center" }]}
-                onPress={addFriend}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons
-                  name={following ? "person-remove" : "person-add-alt"}
-                  style={[styles.text, { fontSize: 32, color: colors.third }]}
-                />
-                <Text style={[styles.text, { color: colors.third }]}>
-                  {following ? " unfollow" : " Follow"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -375,7 +448,6 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    alignItems: "center",
     paddingBottom: 20,
   },
   profileCont: {
@@ -404,7 +476,7 @@ const styleSheet = StyleSheet.create({
   name: {
     fontSize: 20,
     fontFamily: "Raleway_500Medium",
-    paddingLeft: 16,
+    paddingLeft: 12,
   },
   email: {
     fontSize: 16,
@@ -415,7 +487,7 @@ const styleSheet = StyleSheet.create({
   },
   button: {
     padding: 20,
-    marginVertical: 20,
+    marginVertical: 12,
     borderRadius: 8,
     flexDirection: "row",
     justifyContent: "center",
@@ -425,8 +497,9 @@ const styleSheet = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
+    overflow: "hidden",
     maxHeight: 600,
-    width: 400,
+    width: 360,
     flex: 1,
     elevation: 20,
   },

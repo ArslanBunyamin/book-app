@@ -63,20 +63,36 @@ const Comment = ({ item: comment, replyHandler }) => {
               }}
               activeOpacity={0.7}
             >
-              <Text style={[styles.text, { fontFamily: "Raleway_700Bold" }]}>
+              <Text
+                style={[
+                  styles.text,
+                  { fontFamily: "Raleway_700Bold", opacity: 0.8 },
+                ]}
+              >
                 {comment.user.name}
               </Text>
             </TouchableOpacity>
             <Text
               style={[
                 styles.text,
-                { fontFamily: "Raleway_300Light", opacity: 0.6 },
+                { fontFamily: "Raleway_300Light", opacity: 0.4 },
               ]}
             >
               {CalcDate(comment.timestamp)}
             </Text>
           </View>
           <Text style={[styles.text, { opacity: 0.9, flexWrap: "wrap" }]}>
+            {comment.isReply ? (
+              <Text
+                style={{
+                  color: colors.third,
+                }}
+              >
+                {comment.tagName + " "}
+              </Text>
+            ) : (
+              ""
+            )}
             {comment.text}
           </Text>
           <TouchableOpacity
@@ -93,9 +109,10 @@ const Comment = ({ item: comment, replyHandler }) => {
                 styles.text,
                 {
                   fontSize: 14,
-                  color: colors.first,
+                  color: colors.text,
                   fontFamily: "Raleway_700Bold",
                   paddingVertical: 4,
+                  opacity: 0.4,
                 },
               ]}
             >
@@ -124,7 +141,10 @@ const Comment = ({ item: comment, replyHandler }) => {
                 name="totop"
                 style={[styles.icon, { verticalAlign: "bottom", fontSize: 16 }]}
               />
-              <Text style={[styles.text, { color: colors.third }]}> close</Text>
+              <Text style={[styles.text, { color: colors.second }]}>
+                {" "}
+                close
+              </Text>
             </TouchableOpacity>
           </View>
         ) : comment.isReply ? (

@@ -39,6 +39,7 @@ export default Book = ({ route, navigation }) => {
   const [isReplying, setisReplying] = useState(false);
   const [bookmarked, setbookmarked] = useState(false);
   const [replyId, setreplyId] = useState(null);
+  const [tagName, settagName] = useState("");
 
   const user = useSelector((state) => state.user).user; //redux
   const userDoc = firestore().collection("Users").doc(user.id); //firestore
@@ -75,7 +76,7 @@ export default Book = ({ route, navigation }) => {
     setisCommenting(true);
     if (username != "") {
       setisReplying(true);
-      setinputValue("@" + username + " ");
+      settagName("@" + username + " ");
       setreplyId(id);
     } else {
       setinputValue("");
@@ -91,6 +92,7 @@ export default Book = ({ route, navigation }) => {
           (comment) => comment.id == replyId
         );
         tempComments[theIndex].subComments.push({
+          tagName: tagName,
           text: inputValue,
           timestamp: new Date(),
           user: user,
@@ -279,22 +281,6 @@ export default Book = ({ route, navigation }) => {
               </Text>
 
               <View style={styles.commentCont}>
-                <Text
-                  style={[
-                    styles.text,
-                    {
-                      color: colors.fifth,
-                      fontSize: 20,
-                      textAlign: "center",
-                      paddingVertical: 8,
-                      borderBottomWidth: 1,
-                      borderColor: colors.bg3,
-                    },
-                  ]}
-                >
-                  Comments
-                </Text>
-
                 <MasonryList
                   contentContainerStyle={styles.commentList}
                   data={comments}
@@ -331,6 +317,7 @@ export default Book = ({ route, navigation }) => {
                       onEndEditing={() => {
                         setisCommenting(false);
                         setisReplying(false);
+                        settagName("");
                       }}
                       onChangeText={(e) => setinputValue(e)}
                       value={inputValue}
