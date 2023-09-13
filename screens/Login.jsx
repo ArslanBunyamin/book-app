@@ -1,5 +1,5 @@
 import { StyleSheet, Text } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import auth from "@react-native-firebase/auth";
 import { FontAwesome } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
@@ -42,15 +42,17 @@ const Login = () => {
     const currentUser = getUser.user;
     dispatch(setUser(currentUser));
 
-    firestore().collection("Users").doc(currentUser.id).update(
-      {
+    const userData = firestore().collection("Users").doc(currentUser.id);
+
+    if (!(await userData.get()).exists) {
+      userData.set({
         name: currentUser.name,
         email: currentUser.email,
         photoUrl: currentUser.photo,
         id: currentUser.id,
-      },
-      { merge: true }
-    );
+        friends: { follows: 0, followers: 0 },
+      });
+    }
     navigation.reset({
       index: 0,
       routes: [{ name: "tabGroup" }],

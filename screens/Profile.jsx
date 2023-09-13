@@ -65,20 +65,30 @@ const Profile = ({ route, navigation }) => {
     if (following) {
       setfollowing(false);
       await myDoc.update({
-        friends: { follows: firestore.FieldValue.arrayRemove(userInfo.email) },
+        friends: {
+          follows: firestore.FieldValue.arrayRemove(userInfo.email),
+          followers: myInfo.friends.followers,
+        },
       });
       await userDoc.update({
         friends: {
+          follows: user.friends.follows,
           followers: firestore.FieldValue.arrayRemove(myInfo.email),
         },
       });
     } else {
       setfollowing(true);
       await myDoc.update({
-        friends: { follows: firestore.FieldValue.arrayUnion(userInfo.email) },
+        friends: {
+          follows: firestore.FieldValue.arrayUnion(userInfo.email),
+          follows: myInfo.friends.follows,
+        },
       });
       await userDoc.update({
-        friends: { followers: firestore.FieldValue.arrayUnion(myInfo.email) },
+        friends: {
+          follows: user.friends.follows,
+          followers: firestore.FieldValue.arrayUnion(myInfo.email),
+        },
       });
     }
     getUser();
