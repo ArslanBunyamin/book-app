@@ -62,6 +62,7 @@ const Profile = ({ route, navigation }) => {
 
   const addFriend = async () => {
     const myInfo = (await myDoc.get()).data();
+    const userInfo = (await userDoc.get()).data();
     if (following) {
       setfollowing(false);
       await myDoc.update({
@@ -72,7 +73,7 @@ const Profile = ({ route, navigation }) => {
       });
       await userDoc.update({
         friends: {
-          follows: user.friends.follows,
+          follows: userInfo.friends.follows,
           followers: firestore.FieldValue.arrayRemove(myInfo.email),
         },
       });
@@ -81,12 +82,12 @@ const Profile = ({ route, navigation }) => {
       await myDoc.update({
         friends: {
           follows: firestore.FieldValue.arrayUnion(userInfo.email),
-          follows: myInfo.friends.follows,
+          followers: myInfo.friends.followers,
         },
       });
       await userDoc.update({
         friends: {
-          follows: user.friends.follows,
+          follows: userInfo.friends.follows,
           followers: firestore.FieldValue.arrayUnion(myInfo.email),
         },
       });
@@ -263,6 +264,28 @@ const Profile = ({ route, navigation }) => {
     }
   }, [modalWhich]);
 
+  const onChatPress = async () => {
+    const myInfo = (await myDoc.get()).data();
+    const userInfo = (await userDoc.get()).data();
+    const myChats = myInfo.chats;
+    const userChats = userInfo.chats;
+    if (myChats[userInfo.email] == undefined) {
+      const randomId = firestore().collection("x").doc().id;
+
+      await myDoc.update({
+        chats: { [userInfo.email]: randomId },
+      });
+      await userDoc.update({
+        chats: { [myInfo.email]: randomId },
+      });
+    }
+    navigation.push("chat", {
+      chatId: myChats[userInfo.email],
+      me: myInfo.email,
+      user: userInfo.email,
+    });
+  };
+
   return (
     <SafeAreaView style={styles.cont}>
       {loading ? (
@@ -413,7 +436,7 @@ const Profile = ({ route, navigation }) => {
               <View style={{ width: "48.5%" }}>
                 <TouchableOpacity
                   style={[styles.button, { alignItems: "center" }]}
-                  onPress={() => {}}
+                  onPress={onChatPress}
                   activeOpacity={0.7}
                 >
                   <FontAwesome

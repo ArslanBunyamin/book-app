@@ -51,6 +51,8 @@ const Login = () => {
         photoUrl: currentUser.photo,
         id: currentUser.id,
         friends: { follows: 0, followers: 0 },
+        bookmarks: [],
+        chats: [],
       });
     }
     navigation.reset({

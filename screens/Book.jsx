@@ -93,7 +93,7 @@ export default Book = ({ route, navigation }) => {
         );
         tempComments[theIndex].subComments.push({
           tagName: tagName,
-          text: inputValue,
+          text: inputValue.trim(),
           timestamp: new Date(),
           user: user,
           id: randomId,

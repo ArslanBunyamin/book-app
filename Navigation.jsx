@@ -11,6 +11,7 @@ import MyProfile from "./screens/MyProfile";
 import Loading from "./screens/Loading";
 import useThemeColors from "./data/colors";
 import Profile from "./screens/Profile";
+import Chat from "./screens/Chat";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -76,6 +77,22 @@ const Navigation = () => {
       };
     },
   };
+  const reverseHorizontalAnimation = {
+    cardStyleInterpolator: ({ current, layouts }) => {
+      return {
+        cardStyle: {
+          transform: [
+            {
+              translateX: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-layouts.screen.width, 0],
+              }),
+            },
+          ],
+        },
+      };
+    },
+  };
 
   return (
     <NavigationContainer>
@@ -101,6 +118,11 @@ const Navigation = () => {
           name="profile"
           component={Profile}
           options={horizontalAnimation}
+        />
+        <Stack.Screen
+          name="chat"
+          component={Chat}
+          options={reverseHorizontalAnimation}
         />
       </Stack.Navigator>
     </NavigationContainer>
