@@ -1,3 +1,8 @@
+export function toDateTime(secs) {
+  var t = new Date(1970, 0, 1); // Epoch
+  t.setSeconds(secs);
+  return t;
+}
 export default calcDate = (dateProp) => {
   const today = new Date();
   const hh = today.getHours();
@@ -5,11 +10,6 @@ export default calcDate = (dateProp) => {
   const mm = today.getMonth();
   const yyyy = today.getFullYear();
 
-  function toDateTime(secs) {
-    var t = new Date(1970, 0, 1); // Epoch
-    t.setSeconds(secs);
-    return t;
-  }
   const theDate = toDateTime(dateProp.seconds);
 
   const theDay = theDate.getDate();

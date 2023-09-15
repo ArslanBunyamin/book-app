@@ -281,8 +281,8 @@ const Profile = ({ route, navigation }) => {
     }
     navigation.push("chat", {
       chatId: myChats[userInfo.email],
-      me: myInfo.email,
-      user: userInfo.email,
+      me: myInfo,
+      user: userInfo,
     });
   };
 

@@ -38,21 +38,21 @@ const Login = () => {
     // Sign-in the user with the credential
     const returnObject = auth().signInWithCredential(googleCredential);
 
-    const getUser = await GoogleSignin.getCurrentUser();
-    const currentUser = getUser.user;
-    dispatch(setUser(currentUser));
+    const theUser = (await GoogleSignin.getCurrentUser()).user;
 
-    const userData = firestore().collection("Users").doc(currentUser.id);
+    dispatch(setUser(theUser));
+
+    const userData = firestore().collection("Users").doc(theUser.id);
 
     if (!(await userData.get()).exists) {
-      userData.set({
-        name: currentUser.name,
-        email: currentUser.email,
-        photoUrl: currentUser.photo,
-        id: currentUser.id,
-        friends: { follows: 0, followers: 0 },
+      await userData.set({
+        name: theUser.name,
+        email: theUser.email,
+        photoUrl: theUser.photo,
+        id: theUser.id,
+        friends: { follows: [], followers: [] },
         bookmarks: [],
-        chats: [],
+        chats: {},
       });
     }
     navigation.reset({

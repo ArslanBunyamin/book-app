@@ -1,5 +1,6 @@
 import {
   Dimensions,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import firestore from "@react-native-firebase/firestore";
+import { toDateTime } from "../hooks/CalcDate";
 
 export default Chat = ({ route, navigation }) => {
   const chatId = route.params?.chatId;
@@ -26,16 +28,8 @@ export default Chat = ({ route, navigation }) => {
     topnav: [styleSheet.topnav, { backgroundColor: colors.bg }],
     main: [styleSheet.main, { backgroundColor: colors.bg }],
     textInput: [styleSheet.textInput, { color: colors.text }],
-    myMessage: [
-      styleSheet.messageBox,
-      styleSheet.myMessage,
-      { backgroundColor: colors.bg2 },
-    ],
-    userMessage: [
-      styleSheet.messageBox,
-      styleSheet.userMessage,
-      { backgroundColor: colors.third },
-    ],
+    myMessage: [styleSheet.messageBox, styleSheet.myMessage],
+    userMessage: [styleSheet.messageBox, styleSheet.userMessage],
   };
 
   const textInputRef = useRef(null);
@@ -59,12 +53,16 @@ export default Chat = ({ route, navigation }) => {
 
   const sendMessage = async () => {
     if (inputValue.trim() != "") {
+      let continous = false;
+      if (messages.length != 0)
+        continous = messages[messages.length - 1].sender == me.email;
       const randomId = firestore().collection("x").doc().id;
       chatCollection.doc(randomId).set({
         text: inputValue.trim(),
-        sender: me,
+        sender: me.email,
         id: randomId,
-        timestamp: new Date(),
+        timestamp: firestore.Timestamp.now(),
+        continous: continous,
       });
       setinputValue("");
     }
@@ -78,7 +76,7 @@ export default Chat = ({ route, navigation }) => {
     <SafeAreaView style={styles.cont}>
       <View style={styles.topnav}>
         <TouchableOpacity
-          style={styles.text}
+          style={[styles.text, { position: "absolute", left: 0 }]}
           activeOpacity={0.7}
           onPress={() => {
             navigation.goBack();
@@ -86,30 +84,90 @@ export default Chat = ({ route, navigation }) => {
         >
           <Entypo name="chevron-left" style={[styles.text, { fontSize: 32 }]} />
         </TouchableOpacity>
+        <Text
+          style={[
+            styles.text,
+            { verticalAlign: "middle", color: colors.third, fontSize: 18 },
+          ]}
+        >
+          {user.name}
+        </Text>
       </View>
       <View style={styles.main}>
         <FlatList
           data={messages}
           renderItem={({ item }) => {
+            const isItMe = item.sender == me.email;
+            const senderInfo = isItMe ? me : user;
+            const date = toDateTime(item.timestamp.seconds);
+            const mins =
+              date.getMinutes().toString().length == 1
+                ? "0" + date.getMinutes()
+                : date.getMinutes();
+            const hourMin = date.getHours() + 3 + ":" + mins;
             return (
-              <View style={{ padding: 4 }}>
-                <Text
-                  style={[
-                    styles.text,
-                    item.sender == me
-                      ? styles.myMessage
-                      : item.sender == user
-                      ? styles.userMessage
-                      : "",
-                  ]}
-                >
-                  {item.text}
-                </Text>
+              <View
+                style={[
+                  styles.text,
+                  isItMe ? styles.myMessage : styles.userMessage,
+                  { paddingTop: item.continous ? 4 : 12 },
+                ]}
+              >
+                {item.continous ? (
+                  <View style={{ width: 32, marginHorizontal: 4 }} />
+                ) : (
+                  <Image
+                    source={{ uri: senderInfo.photo }}
+                    style={{
+                      resizeMode: "contain",
+                      width: 32,
+                      height: 32,
+                      marginHorizontal: 4,
+                      borderRadius: 80,
+                      display: item.continous ? "none" : "flex",
+                    }}
+                  />
+                )}
+                <View style={{ maxWidth: "64%" }}>
+                  <View
+                    style={[
+                      {
+                        backgroundColor: isItMe ? colors.bg2 : colors.third,
+                        paddingVertical: 4,
+                        paddingHorizontal: 8,
+                        borderRadius: 8,
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.text, { flexWrap: "wrap" }]}>
+                      {item.text}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.text,
+                        {
+                          fontSize: 11,
+                          opacity: 0.7,
+                          marginLeft: 8,
+                          alignSelf: "flex-end",
+                          flexGrow: 1,
+                          textAlign: "right",
+                          minWidth: 30,
+                        },
+                      ]}
+                    >
+                      {hourMin}
+                    </Text>
+                  </View>
+                </View>
               </View>
             );
           }}
           keyExtractor={(item) => item.id}
           ref={flatListRef}
+          showsVerticalScrollIndicator={false}
           onContentSizeChange={() => flatListRef.current.scrollToEnd()}
           ListEmptyComponent={
             <View
@@ -144,9 +202,9 @@ export default Chat = ({ route, navigation }) => {
         <TextInput
           ref={textInputRef}
           style={styles.textInput}
-          placeholder="Write a Comment..."
+          placeholder="Write a Message..."
           placeholderTextColor={colors.bg}
-          cursorColor={colors.bg}
+          cursorColor={colors.second}
           multiline={true}
           selectionColor={colors.first}
           onEndEditing={() => {}}
@@ -188,21 +246,16 @@ const styleSheet = StyleSheet.create({
   },
   text: {
     fontFamily: "Raleway_500Medium",
-    fontSize: 24,
+    fontSize: 15,
   },
   topnav: {
     flexDirection: "row",
-    paddingBottom: 20,
+    paddingBottom: 8,
+    justifyContent: "center",
   },
-  main: { flex: 1 },
+  main: { flex: 1, paddingBottom: 4 },
   textInput: { padding: 8, flex: 1, fontSize: 16 },
-  messageBox: {
-    padding: 8,
-    fontSize: 16,
-    alignSelf: "flex-start",
-    flexWrap: "wrap",
-    maxWidth: "50%",
-  },
-  myMessage: { alignSelf: "flex-end" },
-  userMessage: {},
+  messageBox: {},
+  myMessage: { flexDirection: "row-reverse" },
+  userMessage: { flexDirection: "row" },
 });
