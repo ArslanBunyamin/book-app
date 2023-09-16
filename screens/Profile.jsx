@@ -268,22 +268,26 @@ const Profile = ({ route, navigation }) => {
     const myInfo = (await myDoc.get()).data();
     const userInfo = (await userDoc.get()).data();
     const myChats = myInfo.chats;
-    const userChats = userInfo.chats;
     if (myChats[userInfo.email] == undefined) {
-      const randomId = firestore().collection("x").doc().id;
-
+      const randomId = String(firestore().collection("x").doc().id);
       await myDoc.update({
         chats: { [userInfo.email]: randomId },
       });
       await userDoc.update({
         chats: { [myInfo.email]: randomId },
       });
+      navigation.push("chat", {
+        chatId: randomId,
+        me: myInfo,
+        user: userInfo,
+      });
+    } else {
+      navigation.push("chat", {
+        chatId: myChats[userInfo.email],
+        me: myInfo,
+        user: userInfo,
+      });
     }
-    navigation.push("chat", {
-      chatId: myChats[userInfo.email],
-      me: myInfo,
-      user: userInfo,
-    });
   };
 
   return (

@@ -12,6 +12,7 @@ import Loading from "./screens/Loading";
 import useThemeColors from "./data/colors";
 import Profile from "./screens/Profile";
 import Chat from "./screens/Chat";
+import MyChats from "./screens/MyChats";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -55,6 +56,7 @@ const TabGroup = () => {
     >
       <Tab.Screen name="library" component={Home} />
       <Tab.Screen name="bookmark" component={Favourites} />
+      <Tab.Screen name="md-chatbubbles" component={MyChats} />
       <Tab.Screen name="myProfile" component={MyProfile} />
     </Tab.Navigator>
   );

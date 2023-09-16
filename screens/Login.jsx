@@ -48,7 +48,7 @@ const Login = () => {
       await userData.set({
         name: theUser.name,
         email: theUser.email,
-        photoUrl: theUser.photo,
+        photo: theUser.photo,
         id: theUser.id,
         friends: { follows: [], followers: [] },
         bookmarks: [],

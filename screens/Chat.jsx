@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import firestore from "@react-native-firebase/firestore";
-import { toDateTime } from "../hooks/CalcDate";
 
 export default Chat = ({ route, navigation }) => {
   const chatId = route.params?.chatId;
@@ -44,10 +43,10 @@ export default Chat = ({ route, navigation }) => {
 
   const fetchMessages = () => {
     chatCollection
-      .orderBy("timestamp", "desc")
+      .orderBy("timestamp", "asc")
       .limit(40)
       .onSnapshot((query) => {
-        setmessages([...query.docs.reverse().map((doc) => doc.data())]);
+        setmessages([...query.docs.map((doc) => doc.data())]);
       });
   };
 
@@ -57,11 +56,14 @@ export default Chat = ({ route, navigation }) => {
       if (messages.length != 0)
         continous = messages[messages.length - 1].sender == me.email;
       const randomId = firestore().collection("x").doc().id;
+      const time = new Date().toLocaleTimeString("tr-TR");
+
       chatCollection.doc(randomId).set({
         text: inputValue.trim(),
         sender: me.email,
         id: randomId,
-        timestamp: firestore.Timestamp.now(),
+        timestamp: Date.now(),
+        time: time.substring(0, time.length - 3),
         continous: continous,
       });
       setinputValue("");
@@ -76,7 +78,7 @@ export default Chat = ({ route, navigation }) => {
     <SafeAreaView style={styles.cont}>
       <View style={styles.topnav}>
         <TouchableOpacity
-          style={[styles.text, { position: "absolute", left: 0 }]}
+          style={[styles.text, { position: "absolute", left: 0, top: 12 }]}
           activeOpacity={0.7}
           onPress={() => {
             navigation.goBack();
@@ -99,12 +101,6 @@ export default Chat = ({ route, navigation }) => {
           renderItem={({ item }) => {
             const isItMe = item.sender == me.email;
             const senderInfo = isItMe ? me : user;
-            const date = toDateTime(item.timestamp.seconds);
-            const mins =
-              date.getMinutes().toString().length == 1
-                ? "0" + date.getMinutes()
-                : date.getMinutes();
-            const hourMin = date.getHours() + 3 + ":" + mins;
             return (
               <View
                 style={[
@@ -141,7 +137,15 @@ export default Chat = ({ route, navigation }) => {
                       },
                     ]}
                   >
-                    <Text style={[styles.text, { flexWrap: "wrap" }]}>
+                    <Text
+                      style={[
+                        styles.text,
+                        {
+                          flexWrap: "wrap",
+                          color: isItMe ? colors.text : "#eee",
+                        },
+                      ]}
+                    >
                       {item.text}
                     </Text>
                     <Text
@@ -155,10 +159,11 @@ export default Chat = ({ route, navigation }) => {
                           flexGrow: 1,
                           textAlign: "right",
                           minWidth: 30,
+                          color: isItMe ? colors.text : "#eee",
                         },
                       ]}
                     >
-                      {hourMin}
+                      {item.time}
                     </Text>
                   </View>
                 </View>
@@ -193,7 +198,7 @@ export default Chat = ({ route, navigation }) => {
       <View
         style={{
           flexDirection: "row",
-          backgroundColor: colors.bg3,
+          backgroundColor: "transparent",
           alignItems: "center",
           borderRadius: 4,
           paddingHorizontal: 8,
@@ -203,7 +208,7 @@ export default Chat = ({ route, navigation }) => {
           ref={textInputRef}
           style={styles.textInput}
           placeholder="Write a Message..."
-          placeholderTextColor={colors.bg}
+          placeholderTextColor={colors.placeholder}
           cursorColor={colors.second}
           multiline={true}
           selectionColor={colors.first}
@@ -250,8 +255,8 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    paddingBottom: 8,
     justifyContent: "center",
+    padding: 12,
   },
   main: { flex: 1, paddingBottom: 4 },
   textInput: { padding: 8, flex: 1, fontSize: 16 },
