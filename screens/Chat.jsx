@@ -69,7 +69,15 @@ export default Chat = ({ route, navigation }) => {
         continous: continous,
       });
       setinputValue("");
-      // sendNotif(user.notifToken, me.name, inputValue.trim(), me, user, chatId);
+
+      sendNotif(
+        user.notifToken,
+        me.name,
+        inputValue.trim(),
+        JSON.stringify(me),
+        JSON.stringify(user),
+        JSON.stringify(chatId)
+      );
     }
   };
 
