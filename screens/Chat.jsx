@@ -13,11 +13,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import firestore from "@react-native-firebase/firestore";
+import sendNotif from "../hooks/sendNotif";
 
 export default Chat = ({ route, navigation }) => {
   const chatId = route.params?.chatId;
   const me = route.params?.me;
   const user = route.params?.user;
+
   const windowHeight = Dimensions.get("window").height;
 
   const colors = useThemeColors();
@@ -67,6 +69,7 @@ export default Chat = ({ route, navigation }) => {
         continous: continous,
       });
       setinputValue("");
+      // sendNotif(user.notifToken, me.name, inputValue.trim(), me, user, chatId);
     }
   };
 

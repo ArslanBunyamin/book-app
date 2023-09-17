@@ -4,6 +4,7 @@ import store from "./storee/store";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+
 import {
   useFonts,
   Raleway_100Thin,
@@ -32,6 +33,7 @@ export default function App() {
   if (!fontsLoaded) {
     return null;
   }
+
   return (
     <SafeAreaProvider>
       <Provider store={store}>

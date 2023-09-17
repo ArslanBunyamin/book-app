@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CalcDate from "../hooks/CalcDate";
-import Splash from "../components/Splash";
 
 const MyChats = ({ navigation }) => {
   const colors = useThemeColors();

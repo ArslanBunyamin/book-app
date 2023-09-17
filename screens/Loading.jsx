@@ -1,6 +1,6 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { setUser } from "../storee/userSlice";
 import { useDispatch } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,6 +9,10 @@ import "react-native-safe-area-context";
 import useThemeColors from "../data/colors";
 import bookgif from "../assets/bookgif.gif";
 import { Image } from "react-native";
+import firestore from "@react-native-firebase/firestore";
+import * as Notifications from "expo-notifications";
+import registerForPushNotificationsAsync from "../hooks/registerForPushNotificationsAsync";
+import * as TaskManager from "expo-task-manager";
 
 export default Loading = ({ navigation }) => {
   const colors = useThemeColors();
@@ -30,13 +34,32 @@ export default Loading = ({ navigation }) => {
       const currentUser = getUser.user;
       dispatch(setUser(currentUser));
 
+      const myDoc = firestore().collection("Users").doc(currentUser.id);
+
+      const notifToken = await registerForPushNotificationsAsync();
+      await myDoc.update({ notifToken: String(notifToken.data) });
+
       navigation.reset({
         index: 0,
         routes: [{ name: "tabGroup" }],
       });
     }
   };
+
   useEffect(() => {
+    const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+    TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data }) => {
+      const parsedData = JSON.parse(data.notification.data.body);
+      navigation.navigate("chat", {
+        chatId: parsedData.chatId,
+        me: parsedData.myInfo,
+        user: parsedData.senderInfo,
+      });
+    });
+
+    Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
     isSignedIn();
   }, []);
 

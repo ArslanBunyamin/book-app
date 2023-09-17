@@ -15,6 +15,7 @@ import useThemeColors from "../data/colors";
 import { Dimensions } from "react-native";
 import { Image } from "react-native";
 import bookGif from "../assets/logingif.gif";
+import registerForPushNotificationsAsync from "../hooks/registerForPushNotificationsAsync";
 
 const Login = () => {
   const windowWidth = Dimensions.get("window").width;
@@ -45,6 +46,7 @@ const Login = () => {
     const userData = firestore().collection("Users").doc(theUser.id);
 
     if (!(await userData.get()).exists) {
+      const notifToken = await registerForPushNotificationsAsync();
       await userData.set({
         name: theUser.name,
         email: theUser.email,
@@ -53,6 +55,7 @@ const Login = () => {
         friends: { follows: [], followers: [] },
         bookmarks: [],
         chats: {},
+        notifToken: String(notifToken.data),
       });
     }
     navigation.reset({
