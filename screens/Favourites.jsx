@@ -11,19 +11,16 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import "react-native-gesture-handler";
 import useThemeColors from "../data/colors";
 import { ScrollView } from "react-native";
-import Splash from "../components/Splash";
 import splitTen from "../hooks/splitTen";
 
 const Favourites = ({ navigation }) => {
   const colors = useThemeColors();
   const [favBooks, setfavBooks] = useState([]);
-  const [loading, setloading] = useState(false);
   const userStore = useSelector((state) => state.user);
   const user = userStore.user;
 
-  const getBooks1 = async () => {
-    setloading(true);
-    setfavBooks([]);
+  const getBooks = async () => {
+    let theArray = [];
     const userData = await firestore().collection("Users").doc(user.id).get();
     const fsArray =
       "bookmarks" in userData.data() ? userData.data().bookmarks : [];
@@ -36,16 +33,18 @@ const Favourites = ({ navigation }) => {
       splittedBookmarkArray.forEach(async (bookmarks, index, array) => {
         const books = (await booksCollection.where("id", "in", bookmarks).get())
           .docs;
-        setfavBooks((prev) => prev.concat(books));
+        theArray = theArray.concat(books);
         if (index == array.length - 1) resolve();
       });
     });
-    waitUntilFetch.then(() => setloading(false));
+    waitUntilFetch.then(() => {
+      setfavBooks(theArray);
+    });
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
-      await getBooks1();
+      await getBooks();
     });
 
     return unsubscribe;
@@ -64,46 +63,43 @@ const Favourites = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.cont}>
-      {loading ? (
-        <Splash />
-      ) : (
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          stickyHeaderIndices={[0]}
-          stickyHeaderHiddenOnScroll={true}
-        >
-          <View key={0}>
-            <View style={styles.topnav}>
-              <TouchableOpacity activeOpacity={0.7}>
-                <FontAwesome name="bars" style={styles.icon} />
-              </TouchableOpacity>
-              <Text style={[styles.text, { color: colors.first }]}>
-                Bookmarks
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+        stickyHeaderHiddenOnScroll={true}
+      >
+        <View key={0}>
+          <View style={styles.topnav}>
+            <TouchableOpacity activeOpacity={0.7}>
+              <FontAwesome name="bars" style={styles.icon} />
+            </TouchableOpacity>
+            <Text style={[styles.text, { color: colors.first }]}>
+              Bookmarks
+            </Text>
+            <TouchableOpacity activeOpacity={0.7}>
+              <FontAwesome name="search" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <MasonryList
+          data={favBooks}
+          renderItem={({ item }) => {
+            console.log(item);
+            return <HomeBook book={item} />;
+          }}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <View style={styles.hasNoFavCont}>
+              <AntDesign name="heart" style={styles.heart} />
+              <Text style={[styles.text, { color: colors.bg }]}>
+                Try to add some bookmarks.
               </Text>
-              <TouchableOpacity activeOpacity={0.7}>
-                <FontAwesome name="search" style={styles.icon} />
-              </TouchableOpacity>
             </View>
-          </View>
-          <View style={styles.listCont}>
-            <MasonryList
-              data={favBooks}
-              renderItem={({ item }) => <HomeBook book={item} />}
-              keyExtractor={(item) => item.id}
-              numColumns={2}
-              contentContainerStyle={styles.list}
-              ListEmptyComponent={
-                <View style={styles.hasNoFavCont}>
-                  <AntDesign name="heart" style={styles.heart} />
-                  <Text style={[styles.text, { color: colors.bg }]}>
-                    Try to add some bookmarks.
-                  </Text>
-                </View>
-              }
-            />
-          </View>
-        </ScrollView>
-      )}
+          }
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -128,9 +124,6 @@ const styleSheet = StyleSheet.create({
   },
   icon: {
     fontSize: 28,
-  },
-  listCont: {
-    flex: 1,
   },
   list: {
     paddingTop: 16,

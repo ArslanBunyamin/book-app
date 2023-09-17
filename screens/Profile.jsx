@@ -267,15 +267,17 @@ const Profile = ({ route, navigation }) => {
   const onChatPress = async () => {
     const myInfo = (await myDoc.get()).data();
     const userInfo = (await userDoc.get()).data();
-    const myChats = myInfo.chats;
-    if (myChats[userInfo.email] == undefined) {
+    const myChats = myDoc.collection("chats");
+    const userChats = userDoc.collection("chats");
+    if (!(await myChats.doc(userInfo.id).get()).exists) {
       const randomId = String(firestore().collection("x").doc().id);
-      await myDoc.update({
-        chats: { [userInfo.email]: randomId },
+      await myChats.doc(userInfo.id).set({
+        chatId: randomId,
       });
-      await userDoc.update({
-        chats: { [myInfo.email]: randomId },
+      await userChats.doc(myInfo.id).set({
+        chatId: randomId,
       });
+
       navigation.push("chat", {
         chatId: randomId,
         me: myInfo,
@@ -283,7 +285,7 @@ const Profile = ({ route, navigation }) => {
       });
     } else {
       navigation.push("chat", {
-        chatId: myChats[userInfo.email],
+        chatId: (await myChats.doc(userInfo.id).get()).data().chatId,
         me: myInfo,
         user: userInfo,
       });

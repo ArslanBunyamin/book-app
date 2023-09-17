@@ -54,15 +54,15 @@ export default Chat = ({ route, navigation }) => {
     if (inputValue.trim() != "") {
       let continous = false;
       if (messages.length != 0)
-        continous = messages[messages.length - 1].sender == me.email;
+        continous = messages[messages.length - 1].sender == me.id;
       const randomId = firestore().collection("x").doc().id;
       const time = new Date().toLocaleTimeString("tr-TR");
 
       chatCollection.doc(randomId).set({
         text: inputValue.trim(),
-        sender: me.email,
+        sender: me.id,
         id: randomId,
-        timestamp: Date.now(),
+        timestamp: new Date().getTime(),
         time: time.substring(0, time.length - 3),
         continous: continous,
       });
@@ -99,7 +99,7 @@ export default Chat = ({ route, navigation }) => {
         <FlatList
           data={messages}
           renderItem={({ item }) => {
-            const isItMe = item.sender == me.email;
+            const isItMe = item.sender == me.id;
             const senderInfo = isItMe ? me : user;
             return (
               <View
