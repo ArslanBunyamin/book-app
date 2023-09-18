@@ -32,7 +32,7 @@ export default Loading = ({ navigation }) => {
       const currentUser = (await GoogleSignin.getCurrentUser()).user;
       dispatch(setUser(currentUser));
 
-      // await registerForPushNotificationsAsync(currentUser.id);
+      await registerForPushNotificationsAsync(currentUser.id);
 
       navigation.reset({
         index: 0,
