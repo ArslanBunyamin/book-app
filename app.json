@@ -40,7 +40,10 @@
         "expo-notifications",
         {
           "icon": "./assets/notifIcon.png",
-          "color": "#ffffff"
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/pageturn.wav"
+          ]
         }
       ]
     ]

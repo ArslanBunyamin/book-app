@@ -7,7 +7,7 @@ export default sendNotif = async (userToken, title, body, routeParameter) => {
     data: {
       routeParameter: routeParameter,
     },
-    collapseKey: "green",
+    tag: "STRING_TO_GROUP_NOTIFICATIONS_BY",
   };
 
   await fetch("https://exp.host/--/api/v2/push/send", {
