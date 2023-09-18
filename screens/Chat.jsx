@@ -12,13 +12,14 @@ import useThemeColors from "../data/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import firestore, { firebase } from "@react-native-firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 import sendNotif from "../hooks/sendNotif";
 
 export default Chat = ({ route, navigation }) => {
-  const chatId = route.params?.chatId;
-  const me = route.params?.me;
-  const user = route.params?.user;
+  const prameters = JSON.parse(route.params);
+  const chatId = prameters.chatId;
+  const me = prameters.me;
+  const user = prameters.user;
 
   const windowHeight = Dimensions.get("window").height;
 
