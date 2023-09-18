@@ -16,10 +16,10 @@ import firestore from "@react-native-firebase/firestore";
 import sendNotif from "../hooks/sendNotif";
 
 export default Chat = ({ route, navigation }) => {
-  const prameters = JSON.parse(route.params);
-  const chatId = prameters.chatId;
-  const me = prameters.me;
-  const user = prameters.user;
+  const parameters = route.params;
+  const chatId = parameters.chatId;
+  const me = parameters.me;
+  const user = parameters.user;
 
   const windowHeight = Dimensions.get("window").height;
 
