@@ -5,7 +5,6 @@ import Constants from "expo-constants";
 import firestore from "@react-native-firebase/firestore";
 
 export default async function registerForPushNotificationsAsync(myId) {
-  const myDoc = firestore().collection("Users").doc(String(myId));
   let token;
   if (Device.isDevice) {
     const { status: existingStatus } =
@@ -35,6 +34,8 @@ export default async function registerForPushNotificationsAsync(myId) {
     });
   }
 
+  const myDoc = firestore().collection("Users").doc(myId);
   await myDoc.update({ notifToken: String(token.data) });
+
   return token;
 }

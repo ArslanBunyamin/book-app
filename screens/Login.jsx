@@ -61,7 +61,7 @@ const Login = () => {
       routes: [{ name: "tabGroup" }],
     });
 
-    // await registerForPushNotificationsAsync(theUser.id);
+    await registerForPushNotificationsAsync(theUser.id);
     return returnObject;
   }
 

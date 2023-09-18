@@ -55,8 +55,15 @@ export default Chat = ({ route, navigation }) => {
   const sendMessage = async () => {
     if (inputValue.trim() != "") {
       let continous = false;
-      if (messages.length != 0)
-        continous = messages[messages.length - 1].data().sender == me.id;
+      if (messages.length != 0) {
+        if (messages[messages.length - 1].data().sender == me.id) {
+          continous = true;
+        } else {
+          chatCollection.doc(messages[messages.length - 1].data().id).update({
+            lastMessageOfStreak: true,
+          });
+        }
+      }
       const randomId = firestore().collection("x").doc().id;
       const time = new Date().toLocaleTimeString("tr-TR");
       const timestamp = firestore.FieldValue.serverTimestamp();
@@ -67,6 +74,7 @@ export default Chat = ({ route, navigation }) => {
         timestamp: timestamp,
         time: time.substring(0, time.length - 3),
         continous: continous,
+        lastMessageOfStreak: false,
       });
       setinputValue("");
 
@@ -118,7 +126,7 @@ export default Chat = ({ route, navigation }) => {
                 style={[
                   styles.text,
                   isItMe ? styles.myMessage : styles.userMessage,
-                  { paddingTop: theMessage.continous ? 4 : 12 },
+                  { paddingTop: theMessage.continous ? 2 : 8 },
                 ]}
               >
                 {theMessage.continous ? (
@@ -131,7 +139,7 @@ export default Chat = ({ route, navigation }) => {
                       width: 32,
                       height: 32,
                       marginHorizontal: 4,
-                      borderRadius: 80,
+                      borderRadius: 200,
                       display: theMessage.continous ? "none" : "flex",
                     }}
                   />
@@ -141,11 +149,41 @@ export default Chat = ({ route, navigation }) => {
                     style={[
                       {
                         backgroundColor: isItMe ? colors.bg2 : colors.third,
-                        paddingVertical: 4,
+                        paddingVertical: 6,
                         paddingHorizontal: 8,
-                        borderRadius: 8,
                         flexDirection: "row",
                         flexWrap: "wrap",
+                        borderRadius: 8,
+                        borderBottomRightRadius: !isItMe
+                          ? 8
+                          : !theMessage.continous
+                          ? theMessage.lastMessageOfStreak
+                            ? 8
+                            : 0
+                          : theMessage.lastMessageOfStreak
+                          ? 8
+                          : 0,
+
+                        borderTopRightRadius: !isItMe
+                          ? 8
+                          : !theMessage.continous
+                          ? 8
+                          : 0,
+
+                        borderBottomLeftRadius: isItMe
+                          ? 8
+                          : !theMessage.continous
+                          ? theMessage.lastMessageOfStreak
+                            ? 8
+                            : 0
+                          : theMessage.lastMessageOfStreak
+                          ? 8
+                          : 0,
+                        borderTopLeftRadius: isItMe
+                          ? 8
+                          : !theMessage.continous
+                          ? 8
+                          : 0,
                       },
                     ]}
                   >
@@ -272,7 +310,7 @@ const styleSheet = StyleSheet.create({
   },
   main: { flex: 1, paddingBottom: 4 },
   textInput: { padding: 8, flex: 1, fontSize: 16 },
-  messageBox: {},
+  messageBox: { alignItems: "flex-end" },
   myMessage: { flexDirection: "row-reverse" },
   userMessage: { flexDirection: "row" },
 });

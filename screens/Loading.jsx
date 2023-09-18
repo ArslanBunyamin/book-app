@@ -2,7 +2,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { setUser } from "../storee/userSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "react-native-gesture-handler";
 import "react-native-safe-area-context";
@@ -14,8 +14,6 @@ import registerForPushNotificationsAsync from "../hooks/registerForPushNotificat
 import * as TaskManager from "expo-task-manager";
 
 export default Loading = ({ navigation }) => {
-  const userStore = useSelector((state) => state.user);
-  const me = userStore.user;
   const colors = useThemeColors();
   GoogleSignin.configure({
     webClientId:
@@ -31,11 +29,10 @@ export default Loading = ({ navigation }) => {
         routes: [{ name: "login" }],
       });
     } else {
-      const getUser = await GoogleSignin.getCurrentUser();
-      const currentUser = getUser.user;
+      const currentUser = (await GoogleSignin.getCurrentUser()).user;
       dispatch(setUser(currentUser));
 
-      // await registerForPushNotificationsAsync(me.id);
+      // await registerForPushNotificationsAsync(currentUser.id);
 
       navigation.reset({
         index: 0,
@@ -61,13 +58,6 @@ export default Loading = ({ navigation }) => {
     Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 
     isSignedIn();
-  }, []);
-
-  useEffect(() => {
-    const subscription = Notifications.addPushTokenListener(() =>
-      registerForPushNotificationsAsync(me.id)
-    );
-    return () => subscription.remove();
   }, []);
 
   const styles = {
