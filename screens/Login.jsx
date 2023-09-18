@@ -1,5 +1,4 @@
 import { StyleSheet, Text } from "react-native";
-import React, { useEffect } from "react";
 import auth from "@react-native-firebase/auth";
 import { FontAwesome } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
@@ -46,7 +45,6 @@ const Login = () => {
     const userData = firestore().collection("Users").doc(theUser.id);
 
     if (!(await userData.get()).exists) {
-      const notifToken = await registerForPushNotificationsAsync();
       await userData.set({
         name: theUser.name,
         email: theUser.email,
@@ -63,6 +61,7 @@ const Login = () => {
       routes: [{ name: "tabGroup" }],
     });
 
+    // await registerForPushNotificationsAsync(theUser.id);
     return returnObject;
   }
 

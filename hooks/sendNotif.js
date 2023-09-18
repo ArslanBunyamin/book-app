@@ -27,5 +27,5 @@ export default sendNotif = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify(message),
-  }).then(async (e) => console.log(await e.json()));
+  });
 };

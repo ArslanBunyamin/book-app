@@ -12,7 +12,7 @@ import useThemeColors from "../data/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import firestore from "@react-native-firebase/firestore";
+import firestore, { firebase } from "@react-native-firebase/firestore";
 import sendNotif from "../hooks/sendNotif";
 
 export default Chat = ({ route, navigation }) => {
@@ -45,10 +45,10 @@ export default Chat = ({ route, navigation }) => {
 
   const fetchMessages = () => {
     chatCollection
-      .orderBy("timestamp", "asc")
+      .orderBy("timestamp", "desc")
       .limit(40)
       .onSnapshot((query) => {
-        setmessages([...query.docs.map((doc) => doc.data())]);
+        setmessages(query.docs.reverse());
       });
   };
 
@@ -56,15 +56,15 @@ export default Chat = ({ route, navigation }) => {
     if (inputValue.trim() != "") {
       let continous = false;
       if (messages.length != 0)
-        continous = messages[messages.length - 1].sender == me.id;
+        continous = messages[messages.length - 1].data().sender == me.id;
       const randomId = firestore().collection("x").doc().id;
       const time = new Date().toLocaleTimeString("tr-TR");
-
+      const timestamp = firestore.FieldValue.serverTimestamp();
       chatCollection.doc(randomId).set({
         text: inputValue.trim(),
         sender: me.id,
         id: randomId,
-        timestamp: new Date().getTime(),
+        timestamp: timestamp,
         time: time.substring(0, time.length - 3),
         continous: continous,
       });
@@ -110,17 +110,18 @@ export default Chat = ({ route, navigation }) => {
         <FlatList
           data={messages}
           renderItem={({ item }) => {
-            const isItMe = item.sender == me.id;
+            const theMessage = item.data();
+            const isItMe = theMessage.sender == me.id;
             const senderInfo = isItMe ? me : user;
             return (
               <View
                 style={[
                   styles.text,
                   isItMe ? styles.myMessage : styles.userMessage,
-                  { paddingTop: item.continous ? 4 : 12 },
+                  { paddingTop: theMessage.continous ? 4 : 12 },
                 ]}
               >
-                {item.continous ? (
+                {theMessage.continous ? (
                   <View style={{ width: 32, marginHorizontal: 4 }} />
                 ) : (
                   <Image
@@ -131,7 +132,7 @@ export default Chat = ({ route, navigation }) => {
                       height: 32,
                       marginHorizontal: 4,
                       borderRadius: 80,
-                      display: item.continous ? "none" : "flex",
+                      display: theMessage.continous ? "none" : "flex",
                     }}
                   />
                 )}
@@ -157,7 +158,7 @@ export default Chat = ({ route, navigation }) => {
                         },
                       ]}
                     >
-                      {item.text}
+                      {theMessage.text}
                     </Text>
                     <Text
                       style={[
@@ -174,7 +175,7 @@ export default Chat = ({ route, navigation }) => {
                         },
                       ]}
                     >
-                      {item.time}
+                      {theMessage.time}
                     </Text>
                   </View>
                 </View>
