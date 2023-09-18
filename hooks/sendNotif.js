@@ -1,20 +1,11 @@
-export default sendNotif = async (
-  userToken,
-  title,
-  body,
-  myInfoForNavigateToChat,
-  userInfoForNavigateToChat,
-  chatId
-) => {
+export default sendNotif = async (userToken, title, body, routeParameter) => {
   const message = {
     to: userToken,
     sound: "default",
     title: title,
     body: body,
     data: {
-      myInfo: userInfoForNavigateToChat,
-      senderInfo: myInfoForNavigateToChat,
-      chatId: chatId,
+      routeParameter: routeParameter,
     },
     collapseKey: "green",
   };

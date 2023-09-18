@@ -82,9 +82,7 @@ export default Chat = ({ route, navigation }) => {
         user.notifToken,
         me.name,
         inputValue.trim(),
-        JSON.stringify(me),
-        JSON.stringify(user),
-        JSON.stringify(chatId)
+        JSON.stringify(route.params)
       );
     }
   };

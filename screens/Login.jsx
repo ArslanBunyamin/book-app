@@ -53,7 +53,6 @@ const Login = () => {
         friends: { follows: [], followers: [] },
         bookmarks: [],
         chats: {},
-        notifToken: String(notifToken.data),
       });
     }
     navigation.reset({

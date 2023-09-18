@@ -47,11 +47,7 @@ export default Loading = ({ navigation }) => {
     TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data }) => {
       const parsedData = JSON.parse(data.notification.data.body);
       setTimeout(() => {
-        navigation.navigate("chat", {
-          chatId: parsedData.chatId,
-          me: parsedData.myInfo,
-          user: parsedData.senderInfo,
-        });
+        navigation.navigate("chat", parsedData.routeParameter);
       }, 3000);
     });
 
