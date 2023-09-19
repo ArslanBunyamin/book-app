@@ -20,8 +20,7 @@ const MyProfile = ({ navigation }) => {
   const signOut = async () => {
     GoogleSignin.signOut()
       .then(dispatch(setUser({})))
-      .then(navigation.navigate("login"))
-      .catch((error) => console.log(error));
+      .then(navigation.navigate("login"));
   };
   const windowWidth = Dimensions.get("window").width;
   const user = useSelector((state) => state.user).user;

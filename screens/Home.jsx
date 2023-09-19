@@ -48,8 +48,7 @@ const Home = () => {
           return;
         }
         setBooks((prev) => prev.concat(books.docs));
-      })
-      .catch((error) => console.log(error));
+      });
     setisLoadNext(false);
   };
 

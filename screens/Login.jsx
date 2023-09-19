@@ -89,9 +89,7 @@ const Login = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() =>
-          onGoogleButtonPress().catch((error) => console.log(error))
-        }
+        onPress={() => onGoogleButtonPress()}
         activeOpacity={0.7}
       >
         <FontAwesome name="google" style={styles.icon} />

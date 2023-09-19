@@ -84,7 +84,6 @@ const Favourites = ({ navigation }) => {
         <MasonryList
           data={favBooks}
           renderItem={({ item }) => {
-            console.log(item);
             return <HomeBook book={item} />;
           }}
           keyExtractor={(item) => item.id}

@@ -147,7 +147,7 @@ export default Chat = ({ route, navigation }) => {
                   <View
                     style={[
                       {
-                        backgroundColor: isItMe ? colors.bg2 : colors.third,
+                        backgroundColor: isItMe ? colors.bg3 : colors.third,
                         paddingVertical: 6,
                         paddingHorizontal: 8,
                         flexDirection: "row",

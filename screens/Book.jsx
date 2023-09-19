@@ -1,11 +1,13 @@
 import {
+  Dimensions,
   FlatList,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import {
   Ionicons,
@@ -17,14 +19,16 @@ import {
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import { useState, useEffect, useRef } from "react";
 import useThemeColors from "../data/colors";
 import Splash from "../components/Splash";
 import MasonryList from "@react-native-seoul/masonry-list";
 import Comment from "../components/Comment";
+import ScaledImg from "../components/ScaledImg";
 
 export default Book = ({ route, navigation }) => {
+  const windowWidth = Dimensions.get("window").width;
   const colors = useThemeColors();
   const book = route.params?.book;
   const bookId = route.params?.bookId;
@@ -40,6 +44,7 @@ export default Book = ({ route, navigation }) => {
   const [bookmarked, setbookmarked] = useState(false);
   const [replyId, setreplyId] = useState(null);
   const [tagName, settagName] = useState("");
+  const [modalVisible, setmodalVisible] = useState(false);
 
   const user = useSelector((state) => state.user).user; //redux
   const userDoc = firestore().collection("Users").doc(user.id); //firestore
@@ -155,6 +160,14 @@ export default Book = ({ route, navigation }) => {
     textInput: [styleSheet.textInput, { color: colors.bg }],
     commentList: styleSheet.commentList,
     comment: styleSheet.comment,
+    modalCont: [
+      styleSheet.modalCont,
+      {
+        backgroundColor: colors.bg2,
+        maxWidth: windowWidth - 40,
+        borderColor: colors.fifth,
+      },
+    ],
   };
 
   return (
@@ -163,6 +176,33 @@ export default Book = ({ route, navigation }) => {
         <Splash />
       ) : (
         <View style={{ flex: 1 }}>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setmodalVisible(false);
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#00000099",
+              }}
+              onPress={() => setmodalVisible(false)}
+              activeOpacity={0.9}
+            >
+              <View style={styles.modalCont}>
+                <ScaledImg
+                  style={{ resizeMode: "contain", aspectRatio: 1 }}
+                  uri={book.coverUrl}
+                  desiredWidth={windowWidth - 40}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
           <View style={styles.topnav}>
             <TouchableOpacity
               onPress={() => {
@@ -216,7 +256,12 @@ export default Book = ({ route, navigation }) => {
                   </View>
                 </View>
               </View>
-              <Image style={styles.image} source={{ uri: book.coverUrl }} />
+              <TouchableOpacity
+                onPress={() => setmodalVisible(true)}
+                activeOpacity={0.9}
+              >
+                <Image style={styles.image} source={{ uri: book.coverUrl }} />
+              </TouchableOpacity>
               <View
                 style={{
                   paddingTop: 16,
@@ -418,5 +463,12 @@ const styleSheet = StyleSheet.create({
   comment: { padding: 8, flexDirection: "row", alignItems: "center" },
   pp: {
     resizeMode: "contain",
+  },
+  modalCont: {
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 1,
   },
 });
