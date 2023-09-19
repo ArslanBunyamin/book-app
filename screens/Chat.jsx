@@ -1,19 +1,21 @@
 import {
   Dimensions,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Entypo, FontAwesome, AntDesign } from "@expo/vector-icons";
+import { Entypo, FontAwesome, AntDesign, Ionicons } from "@expo/vector-icons";
 import useThemeColors from "../data/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import firestore from "@react-native-firebase/firestore";
 import sendNotif from "../hooks/sendNotif";
+import * as ImagePicker from "expo-image-picker";
 
 export default Chat = ({ route, navigation }) => {
   const parameters = route.params;
@@ -21,6 +23,7 @@ export default Chat = ({ route, navigation }) => {
   const me = parameters.me;
   const user = parameters.user;
 
+  const windowWidth = Dimensions.get("window").width;
   const windowHeight = Dimensions.get("window").height;
 
   const colors = useThemeColors();
@@ -32,12 +35,23 @@ export default Chat = ({ route, navigation }) => {
     textInput: [styleSheet.textInput, { color: colors.text }],
     myMessage: [styleSheet.messageBox, styleSheet.myMessage],
     userMessage: [styleSheet.messageBox, styleSheet.userMessage],
+    modalCont: [
+      styleSheet.modalCont,
+      {
+        backgroundColor: colors.bg2,
+        maxWidth: windowWidth - 20,
+        maxHeight: windowHeight - 100,
+        borderColor: colors.fifth,
+      },
+    ],
   };
 
   const textInputRef = useRef(null);
   const flatListRef = useRef(null);
   const [inputValue, setinputValue] = useState("");
   const [messages, setmessages] = useState([]);
+  const [modalVisible, setmodalVisible] = useState(false);
+  const [modalImg, setmodalImg] = useState("");
 
   const chatCollection = firestore()
     .collection("Chats")
@@ -92,11 +106,90 @@ export default Chat = ({ route, navigation }) => {
     fetchMessages();
   }, []);
 
+  const openCamera = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+    });
+
+    if (!result.canceled) {
+      const randomId = firestore().collection("x").doc().id;
+      const time = new Date().toLocaleTimeString("tr-TR");
+      const timestamp = firestore.FieldValue.serverTimestamp();
+      let continous = false;
+
+      if (messages[messages.length - 1].data().sender == me.id) {
+        continous = true;
+      } else {
+        chatCollection.doc(messages[messages.length - 1].data().id).update({
+          lastMessageOfStreak: true,
+        });
+      }
+
+      chatCollection.doc(randomId).set({
+        image: result.assets[0].uri,
+        sender: me.id,
+        id: randomId,
+        timestamp: timestamp,
+        time: time.substring(0, time.length - 3),
+        continous: continous,
+        lastMessageOfStreak: false,
+      });
+
+      sendNotif(
+        user.notifToken,
+        me.name,
+        "🖼️ Image",
+        JSON.stringify(route.params)
+      );
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+    });
+
+    if (!result.canceled) {
+      const randomId = firestore().collection("x").doc().id;
+      const time = new Date().toLocaleTimeString("tr-TR");
+      const timestamp = firestore.FieldValue.serverTimestamp();
+      let continous = false;
+
+      if (messages[messages.length - 1].data().sender == me.id) {
+        continous = true;
+      } else {
+        chatCollection.doc(messages[messages.length - 1].data().id).update({
+          lastMessageOfStreak: true,
+        });
+      }
+
+      chatCollection.doc(randomId).set({
+        image: result.assets[0].uri,
+        sender: me.id,
+        id: randomId,
+        timestamp: timestamp,
+        time: time.substring(0, time.length - 3),
+        continous: continous,
+        lastMessageOfStreak: false,
+      });
+
+      sendNotif(
+        user.notifToken,
+        me.name,
+        "🖼️ Image",
+        JSON.stringify(route.params)
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.cont}>
       <View style={styles.topnav}>
         <TouchableOpacity
-          style={[styles.text, { position: "absolute", left: 0, top: 12 }]}
+          style={[
+            styles.text,
+            { position: "absolute", left: 0, top: 0, padding: 12 },
+          ]}
           activeOpacity={0.7}
           onPress={() => {
             navigation.goBack();
@@ -112,6 +205,41 @@ export default Chat = ({ route, navigation }) => {
         >
           {user.name}
         </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            position: "absolute",
+            right: 0,
+            top: 0,
+            padding: 8,
+          }}
+        >
+          <TouchableOpacity onPress={() => openCamera()} activeOpacity={0.7}>
+            <Ionicons
+              name="camera"
+              style={[
+                styles.icon,
+                {
+                  fontSize: 30,
+                  color: colors.second,
+                },
+              ]}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => pickImage()} activeOpacity={0.7}>
+            <Ionicons
+              name="image"
+              style={[
+                styles.icon,
+                {
+                  fontSize: 30,
+                  color: colors.second,
+                  paddingLeft: 8,
+                },
+              ]}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.main}>
         <FlatList
@@ -128,6 +256,32 @@ export default Chat = ({ route, navigation }) => {
                   { paddingTop: theMessage.continous ? 2 : 8 },
                 ]}
               >
+                <Modal
+                  animationType="fade"
+                  transparent={true}
+                  visible={modalVisible}
+                  onRequestClose={() => {
+                    setmodalVisible(false);
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    onPress={() => setmodalVisible(false)}
+                    activeOpacity={0.9}
+                  >
+                    <View style={styles.modalCont}>
+                      <ScaledImg
+                        style={{ resizeMode: "contain", aspectRatio: 1 }}
+                        uri={modalImg}
+                        desiredWidth={windowWidth - 20}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
                 {theMessage.continous ? (
                   <View style={{ width: 32, marginHorizontal: 4 }} />
                 ) : (
@@ -153,6 +307,7 @@ export default Chat = ({ route, navigation }) => {
                         flexDirection: "row",
                         flexWrap: "wrap",
                         borderRadius: 8,
+                        overflow: "hidden",
                         borderBottomRightRadius: !isItMe
                           ? 8
                           : !theMessage.continous
@@ -186,17 +341,39 @@ export default Chat = ({ route, navigation }) => {
                       },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.text,
-                        {
-                          flexWrap: "wrap",
-                          color: isItMe ? colors.text : "#eee",
-                        },
-                      ]}
-                    >
-                      {theMessage.text}
-                    </Text>
+                    {theMessage.image == undefined ? (
+                      <Text
+                        style={[
+                          styles.text,
+                          {
+                            flexWrap: "wrap",
+                            color: isItMe ? colors.text : "#eee",
+                          },
+                        ]}
+                      >
+                        {theMessage.text}
+                      </Text>
+                    ) : (
+                      theMessage.image && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setmodalImg(theMessage.image);
+                            setmodalVisible(true);
+                          }}
+                          activeOpacity={0.7}
+                          style={{ width: "100%", marginBottom: 4 }}
+                        >
+                          <Image
+                            source={{ uri: theMessage.image }}
+                            style={{
+                              width: "100%",
+                              aspectRatio: 1,
+                              resizeMode: "cover",
+                            }}
+                          />
+                        </TouchableOpacity>
+                      )
+                    )}
                     <Text
                       style={[
                         styles.text,
@@ -271,6 +448,7 @@ export default Chat = ({ route, navigation }) => {
             }, 500)
           }
         />
+
         <TouchableOpacity
           onPress={() => {
             sendMessage();
@@ -308,8 +486,19 @@ const styleSheet = StyleSheet.create({
     padding: 12,
   },
   main: { flex: 1, paddingBottom: 4 },
-  textInput: { padding: 8, flex: 1, fontSize: 16 },
+  textInput: {
+    padding: 8,
+    flex: 1,
+    fontSize: 16,
+  },
   messageBox: { alignItems: "flex-end" },
   myMessage: { flexDirection: "row-reverse" },
   userMessage: { flexDirection: "row" },
+  modalCont: {
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 1,
+  },
 });

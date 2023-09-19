@@ -12,7 +12,7 @@ import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import CalcDate from "../hooks/CalcDate";
 
 const MyChats = ({ navigation }) => {
@@ -135,11 +135,35 @@ const MyChats = ({ navigation }) => {
                     >
                       {item.lastMessage.sender == me.id ? "ben: " : ""}
                     </Text>
-                    <Text style={[styles.text, { fontSize: 18, opacity: 0.7 }]}>
-                      {item.lastMessage.text.length > 16
-                        ? item.lastMessage.text.substring(0, 16) + "..."
-                        : item.lastMessage.text}
-                    </Text>
+                    {item.lastMessage.image == undefined ? (
+                      <Text
+                        style={[styles.text, { fontSize: 18, opacity: 0.7 }]}
+                      >
+                        {item.lastMessage.text.length > 16
+                          ? item.lastMessage.text.substring(0, 16) + "..."
+                          : item.lastMessage.text}
+                      </Text>
+                    ) : (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          opacity: 0.7,
+                          alignItems: "flex-end",
+                        }}
+                      >
+                        <Ionicons
+                          name="image"
+                          style={{
+                            fontSize: 18,
+                            color: colors.text,
+                          }}
+                        />
+                        <Text style={[styles.text, { fontSize: 18 }]}>
+                          {" "}
+                          Image
+                        </Text>
+                      </View>
+                    )}
                   </View>
                   <Text style={[styles.text, { fontSize: 18, opacity: 0.7 }]}>
                     {CalcDate(item.lastMessage.timestamp)}
