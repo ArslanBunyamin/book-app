@@ -66,17 +66,19 @@ const MyChats = ({ navigation }) => {
           if (index == array.length - 1) resolve();
         });
       });
-      waitUntilFetch.then(() => setmyChats(theArray));
+      waitUntilFetch.then(() =>
+        setmyChats(
+          theArray
+            .sort((a, b) => a.lastMessage.timestamp - b.lastMessage.timestamp)
+            .reverse()
+        )
+      );
     });
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", async () => {
-      await getMyChats();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+    getMyChats();
+  }, []);
 
   const openChat = async (chatId, userInfo) => {
     const myInfo = (await myDoc.get()).data();
@@ -92,7 +94,11 @@ const MyChats = ({ navigation }) => {
       <Text
         style={[
           styles.text,
-          { textAlign: "center", fontSize: 24, paddingBottom: 12 },
+          {
+            textAlign: "center",
+            fontSize: 24,
+            paddingBottom: 12,
+          },
         ]}
       >
         Chats
@@ -106,16 +112,22 @@ const MyChats = ({ navigation }) => {
               activeOpacity={0.7}
               style={styles.chat}
             >
-              <Image
-                source={{ uri: item.userInfo.photo }}
-                style={{
-                  resizeMode: "contain",
-                  width: 50,
-                  height: 50,
-                  borderRadius: 80,
-                  marginRight: 12,
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.push("profile", { user: item.userInfo });
                 }}
-              />
+              >
+                <Image
+                  source={{ uri: item.userInfo.photo }}
+                  style={{
+                    resizeMode: "contain",
+                    width: 50,
+                    height: 50,
+                    borderRadius: 80,
+                    marginRight: 12,
+                  }}
+                />
+              </TouchableOpacity>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.text, { fontSize: 20 }]}>
                   {item.userInfo.name}

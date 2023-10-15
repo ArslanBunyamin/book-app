@@ -46,7 +46,11 @@ export default Loading = ({ navigation }) => {
 
     TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data }) => {
       const parsedData = JSON.parse(data.notification.data.body);
-      navigation.navigate("chat", JSON.parse(parsedData.routeParameter));
+      navigation.navigate("chat", {
+        chatId: JSON.parse(parsedData.chatId),
+        me: JSON.parse(parsedData.me),
+        user: JSON.parse(parsedData.user),
+      });
     });
 
     Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);

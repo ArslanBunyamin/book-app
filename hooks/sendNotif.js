@@ -1,11 +1,20 @@
-export default sendNotif = async (userToken, title, body, routeParameter) => {
+export default sendNotif = async (
+  userToken,
+  title,
+  body,
+  me = "",
+  user = "",
+  chatId = ""
+) => {
   const message = {
     to: userToken,
     sound: "default",
     title: title,
     body: body,
     data: {
-      routeParameter: routeParameter,
+      me: user,
+      user: me,
+      chatId: chatId,
     },
     tag: "STRING_TO_GROUP_NOTIFICATIONS_BY",
   };

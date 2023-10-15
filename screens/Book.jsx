@@ -2,7 +2,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -15,7 +14,6 @@ import {
   MaterialCommunityIcons,
   FontAwesome,
 } from "@expo/vector-icons";
-
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,6 +24,7 @@ import Splash from "../components/Splash";
 import MasonryList from "@react-native-seoul/masonry-list";
 import Comment from "../components/Comment";
 import ScaledImg from "../components/ScaledImg";
+import Modal from "react-native-modal";
 
 export default Book = ({ route, navigation }) => {
   const windowWidth = Dimensions.get("window").width;
@@ -75,11 +74,9 @@ export default Book = ({ route, navigation }) => {
     }
   };
 
-  const commentButtonPressed = (
-    { username, id } = { username: "", id: "" }
-  ) => {
+  const commentButtonPressed = ({ username, id }) => {
     setisCommenting(true);
-    if (username != "") {
+    if (username != undefined) {
       setisReplying(true);
       settagName("@" + username + " ");
       setreplyId(id);
@@ -139,6 +136,10 @@ export default Book = ({ route, navigation }) => {
     }
   }, [isCommenting]);
 
+  useEffect(() => {
+    if (book.description.split(" ").length <= 40) setdescOpened(true);
+  }, []);
+
   const styles = {
     cont: [styleSheet.cont, { backgroundColor: colors.bg }],
     text: [styleSheet.text, { color: colors.text }],
@@ -163,7 +164,6 @@ export default Book = ({ route, navigation }) => {
     modalCont: [
       styleSheet.modalCont,
       {
-        backgroundColor: colors.bg2,
         maxWidth: windowWidth - 40,
         borderColor: colors.fifth,
       },
@@ -177,31 +177,24 @@ export default Book = ({ route, navigation }) => {
       ) : (
         <View style={{ flex: 1 }}>
           <Modal
-            animationType="fade"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
+            animationIn={"pulse"}
+            animationOut={"zoomOut"}
+            isVisible={modalVisible}
+            backdropColor={colors.bg}
+            onBackButtonPress={() => {
+              setmodalVisible(false);
+            }}
+            onBackdropPress={() => {
               setmodalVisible(false);
             }}
           >
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "#00000099",
-              }}
-              onPress={() => setmodalVisible(false)}
-              activeOpacity={0.9}
-            >
-              <View style={styles.modalCont}>
-                <ScaledImg
-                  style={{ resizeMode: "contain", aspectRatio: 1 }}
-                  uri={book.coverUrl}
-                  desiredWidth={windowWidth - 40}
-                />
-              </View>
-            </TouchableOpacity>
+            <View style={styles.modalCont}>
+              <ScaledImg
+                style={{ resizeMode: "contain", aspectRatio: 1 }}
+                uri={book.coverUrl}
+                desiredWidth={windowWidth - 40}
+              />
+            </View>
           </Modal>
           <View style={styles.topnav}>
             <TouchableOpacity
@@ -231,7 +224,18 @@ export default Book = ({ route, navigation }) => {
                   data={book.categories}
                   renderItem={({ item }) => {
                     return (
-                      <Text style={[styles.text, styles.genre]}>{item}</Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate("library", {
+                            genre: item.trim(),
+                          });
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.text, styles.genre]}>
+                          {item.trim()}
+                        </Text>
+                      </TouchableOpacity>
                     );
                   }}
                   keyExtractor={(item) => book.categories.indexOf(item)}
@@ -301,29 +305,35 @@ export default Book = ({ route, navigation }) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <Text style={[styles.text, styles.desc]}>
-                {descOpened
-                  ? book.description
-                  : book.description.split(" ").slice(0, 40).join(" ")}
-                <Text
-                  style={[
-                    styles.text,
-                    { color: colors.first, fontFamily: "Raleway_900Black" },
-                  ]}
-                >
+              <TouchableOpacity
+                onPress={() => {
+                  if (!descOpened) setdescOpened(true);
+                }}
+                activeOpacity={descOpened ? 1 : 0.8}
+              >
+                <Text style={[styles.text, styles.desc]}>
+                  {descOpened
+                    ? book.description
+                    : book.description.split(" ").slice(0, 40).join(" ")}
                   <Text
-                    onPress={() => setdescOpened((prev) => !prev)}
                     style={[
                       styles.text,
-                      {
-                        color: colors.first,
-                      },
+                      { color: colors.first, fontFamily: "Raleway_900Black" },
                     ]}
                   >
-                    {descOpened ? "...read less" : " . . . read more"}
+                    <Text
+                      style={[
+                        styles.text,
+                        {
+                          color: colors.first,
+                        },
+                      ]}
+                    >
+                      {descOpened ? "" : " . . . read more"}
+                    </Text>
                   </Text>
                 </Text>
-              </Text>
+              </TouchableOpacity>
 
               <View style={styles.commentCont}>
                 <MasonryList
@@ -458,7 +468,7 @@ const styleSheet = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 12,
   },
-  textInput: { padding: 8, flex: 1, fontSize: 16 },
+  textInput: { padding: 8, flex: 1, fontSize: 16, maxHeight: 40 },
   commentList: {},
   comment: { padding: 8, flexDirection: "row", alignItems: "center" },
   pp: {

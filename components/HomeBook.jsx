@@ -1,14 +1,30 @@
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ScaledImg from "./ScaledImg";
-import useThemeColors from "../data/colors";
+// import { useEffect } from "react";
+// import firestore from "@react-native-firebase/firestore";
 
 const HomeBook = ({ book }) => {
   const windowWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
-  const colors = useThemeColors();
+
+  // useEffect(() => {
+  //   const genres = book.data().categories;
+  //   genres.forEach((genre) => {
+  //     firestore()
+  //       .collection("Genres")
+  //       .doc(genre.trim())
+  //       .set(
+  //         {
+  //           bookIds: firestore.FieldValue.arrayUnion(book.data().id),
+  //         },
+  //         { merge: true }
+  //       );
+  //   });
+  // }, []);
+
   return (
-    <View style={[styles.cont]}>
+    <View style={styles.cont}>
       <TouchableOpacity
         onPress={() => {
           navigation.navigate("book", {

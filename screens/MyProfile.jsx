@@ -20,7 +20,12 @@ const MyProfile = ({ navigation }) => {
   const signOut = async () => {
     GoogleSignin.signOut()
       .then(dispatch(setUser({})))
-      .then(navigation.navigate("login"));
+      .then(
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "login" }],
+        })
+      );
   };
   const windowWidth = Dimensions.get("window").width;
   const user = useSelector((state) => state.user).user;

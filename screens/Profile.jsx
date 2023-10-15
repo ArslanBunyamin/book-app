@@ -1,6 +1,5 @@
 import {
   Dimensions,
-  Modal,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -17,6 +16,8 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import splitTen from "../hooks/splitTen";
 import Splash from "../components/Splash";
+import sendNotif from "../hooks/sendNotif";
+import Modal from "react-native-modal";
 
 const Profile = ({ route, navigation }) => {
   const userInfo = route.params?.user;
@@ -47,7 +48,13 @@ const Profile = ({ route, navigation }) => {
     text: [styleSheet.text, { color: colors.text }],
     infoText: [styleSheet.infoText, { color: colors.text }],
     button: [styleSheet.button, { backgroundColor: colors.bg2 }],
-    modalCont: [styleSheet.modalCont, { backgroundColor: colors.bg2 }],
+    modalCont: [
+      styleSheet.modalCont,
+      {
+        borderColor: colors.third,
+        backgroundColor: colors.bg2,
+      },
+    ],
   };
 
   const getAndSetFriends = async () => {
@@ -65,32 +72,43 @@ const Profile = ({ route, navigation }) => {
     const userInfo = (await userDoc.get()).data();
     if (following) {
       setfollowing(false);
+      const index = myInfo.friends.follows.indexOf(userInfo.email);
+      if (index > -1) {
+        myInfo.friends.follows.splice(index, 1);
+      }
+      const index2 = userInfo.friends.followers.indexOf(myInfo.email);
+      if (index2 > -1) {
+        userInfo.friends.followers.splice(index2, 1);
+      }
+
       await myDoc.update({
         friends: {
-          follows: firestore.FieldValue.arrayRemove(userInfo.email),
+          follows: myInfo.friends.follows,
           followers: myInfo.friends.followers,
         },
       });
       await userDoc.update({
         friends: {
           follows: userInfo.friends.follows,
-          followers: firestore.FieldValue.arrayRemove(myInfo.email),
+          followers: userInfo.friends.followers,
         },
       });
+      sendNotif(user.notifToken, "😒 A User Unfollowed You", me.name);
     } else {
       setfollowing(true);
       await myDoc.update({
         friends: {
-          follows: firestore.FieldValue.arrayUnion(userInfo.email),
+          follows: [...myInfo.friends.follows, userInfo.email],
           followers: myInfo.friends.followers,
         },
       });
       await userDoc.update({
         friends: {
           follows: userInfo.friends.follows,
-          followers: firestore.FieldValue.arrayUnion(myInfo.email),
+          followers: [...userInfo.friends.followers, myInfo.email],
         },
       });
+      sendNotif(user.notifToken, "😎 New Follower", me.name);
     }
     getUser();
   };
@@ -299,11 +317,12 @@ const Profile = ({ route, navigation }) => {
       ) : (
         <View style={{ flex: 1 }}>
           <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
+            isVisible={modalVisible}
+            backdropColor={colors.bg}
+            onBackdropPress={() => {
               setModalVisible(false);
+            }}
+            onModalHide={() => {
               setmodalWhich("");
             }}
           >
@@ -315,7 +334,7 @@ const Profile = ({ route, navigation }) => {
               }}
             >
               <View style={styles.modalCont}>
-                <View style={{ flex: 1, width: 360 }}>
+                <View style={{ flex: 1, width: "100%" }}>
                   <FlatList
                     data={modalData}
                     renderItem={({ item }) => {
@@ -332,36 +351,6 @@ const Profile = ({ route, navigation }) => {
                     keyExtractor={(item) => item.id}
                     numColumns={1}
                   />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                    position: "absolute",
-                    bottom: 20,
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => {
-                      setModalVisible(false);
-                      setmodalWhich("");
-                    }}
-                    activeOpacity={0.7}
-                    style={{
-                      backgroundColor: colors.bg3,
-                      paddingVertical: 8,
-                      paddingHorizontal: 20,
-                      elevation: 5,
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: colors.bg,
-                    }}
-                  >
-                    <Text style={[styles.infoText, { color: colors.first }]}>
-                      close
-                    </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -537,10 +526,11 @@ const styleSheet = StyleSheet.create({
     alignItems: "center",
     borderRadius: 12,
     overflow: "hidden",
-    maxHeight: 600,
+    maxHeight: "80%",
     width: 360,
     flex: 1,
     elevation: 20,
+    borderWidth: 1,
   },
   modalFriends: {
     flex: 1,

@@ -70,15 +70,9 @@ const Favourites = ({ navigation }) => {
       >
         <View key={0}>
           <View style={styles.topnav}>
-            <TouchableOpacity activeOpacity={0.7}>
-              <FontAwesome name="bars" style={styles.icon} />
-            </TouchableOpacity>
             <Text style={[styles.text, { color: colors.first }]}>
               Bookmarks
             </Text>
-            <TouchableOpacity activeOpacity={0.7}>
-              <FontAwesome name="search" style={styles.icon} />
-            </TouchableOpacity>
           </View>
         </View>
         <MasonryList
@@ -115,10 +109,10 @@ const styleSheet = StyleSheet.create({
   },
   topnav: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingVertical: 16,
     elevation: 100,
   },
   icon: {
