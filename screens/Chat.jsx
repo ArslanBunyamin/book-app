@@ -402,6 +402,7 @@ export default Chat = ({ route, navigation }) => {
     fetchMessages();
     setdidMount(true);
   }, []);
+
   const sendMessage = () => {
     if (inputValue.trim() == "") return;
     const tempMessage = inputValue.trim();
@@ -444,6 +445,7 @@ export default Chat = ({ route, navigation }) => {
   const openCamera = async () => {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
+      quality: 0.7,
     });
 
     const randomId = firestore().collection("x").doc().id;
@@ -490,6 +492,7 @@ export default Chat = ({ route, navigation }) => {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
+      quality: 0.7,
     });
 
     const randomId = firestore().collection("x").doc().id;
