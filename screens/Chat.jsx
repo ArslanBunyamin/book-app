@@ -37,6 +37,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import storage from "@react-native-firebase/storage";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 const ListItem = memo(({ item, me, user, chatCollection, replyMessage }) => {
   const [modalVisible, setmodalVisible] = useState(false);
@@ -119,6 +120,22 @@ const ListItem = memo(({ item, me, user, chatCollection, replyMessage }) => {
       swiped.value = { id: theMessage.id, dx: withSpring(0) };
     },
   });
+
+  useEffect(() => {
+    const rotateScreen = async (event) => {
+      await ScreenOrientation.lockAsync(event.orientationInfo.orientation);
+    };
+
+    const subscription = ScreenOrientation.addOrientationChangeListener(
+      (event) => {
+        rotateScreen(event);
+      }
+    );
+
+    return () => {
+      ScreenOrientation.removeOrientationChangeListener(subscription);
+    };
+  }, []);
 
   return (
     <GestureHandlerRootView>

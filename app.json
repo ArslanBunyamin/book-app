@@ -51,6 +51,12 @@
             "./assets/pageturn.wav"
           ]
         }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
+        }
       ]
     ]
   }
